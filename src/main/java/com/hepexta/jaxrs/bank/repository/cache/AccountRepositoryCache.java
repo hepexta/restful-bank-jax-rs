@@ -8,13 +8,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AccountRepositoryCache implements Repository<Account> {
 
     private AtomicInteger accountCounter = new AtomicInteger();
 
-    private Map<String, Account> accounts = new HashMap<>();
+    private Map<String, Account> accounts = new ConcurrentHashMap<>();
 
     private AccountRepositoryCache() {
     }
@@ -41,14 +42,14 @@ public class AccountRepositoryCache implements Repository<Account> {
     @Override
     public String insert(Account model) {
         String id = String.valueOf(accountCounter.incrementAndGet());
-        model.setNumber(id);
+        model.setId(id);
         accounts.put(id, model);
         return id;
     }
 
     @Override
     public boolean modify(Account model) {
-        return accounts.put(model.getNumber(), model) != null;
+        return accounts.put(model.getId(), model) != null;
     }
 
     @Override
@@ -58,6 +59,11 @@ public class AccountRepositoryCache implements Repository<Account> {
 
     public void clear(){
         accounts = new HashMap<>();
+        accountCounter = new AtomicInteger();
+    }
+
+    public void clearCache() {
+        accounts.clear();
         accountCounter = new AtomicInteger();
     }
 }

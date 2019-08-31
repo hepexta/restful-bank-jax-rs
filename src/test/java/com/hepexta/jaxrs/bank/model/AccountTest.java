@@ -13,9 +13,18 @@ public class AccountTest {
 
     @Before
     public void setUp() {
-        Client client = new Client("1", "John Smith");
         BigDecimal balance = new BigDecimal(1000);
-        account = new Account("ACC001", client, balance);
+        Client client = Client.builder()
+                .id("1")
+                .name("John Smith")
+                .build();
+
+        account = Account.builder()
+                .id("1")
+                .number("ACC001")
+                .client(client)
+                .balance(balance)
+                .build();
     }
 
     @Test

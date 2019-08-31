@@ -1,31 +1,40 @@
 package com.hepexta.jaxrs.bank.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.repository.AccountFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
-import com.hepexta.jaxrs.bank.repository.cache.AccountRepositoryCache;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ToString
+@JsonFormat
 public class Account {
 
-    private Repository<Account> accountRepository = AccountFactory.getAccountRepository();
+    private static Repository<Account> accountRepository = AccountFactory.getAccountRepository();
 
+    @JsonProperty
+    private String id;
+    @JsonProperty
     private String number;
+    @JsonProperty(required = true)
     private Client client;
+    @JsonProperty(required = true)
     private BigDecimal balance;
 
     public Account(Client client, BigDecimal balance) {
-        this.client = client;
-        this.balance = balance;
-    }
-
-    public Account(String number, Client client, BigDecimal balance) {
-        this.number = number;
         this.client = client;
         this.balance = balance;
     }
@@ -48,19 +57,8 @@ public class Account {
         }
     }
 
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
     private void mockDataBase() {
         accountRepository.modify(this);
     }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public String getNumber() {
-        return this.number;
-    }
 }

@@ -23,7 +23,6 @@ public class AccountRepositoryCacheTest {
 
     @Test
     public void testCreate() {
-
         accountRepository.insert(new Account(CLIENT, new BigDecimal(5000)));
         Assert.assertEquals(4, accountRepository.getList().size());
     }
@@ -37,9 +36,14 @@ public class AccountRepositoryCacheTest {
     @Test
     public void testModify() {
         BigDecimal newBalance = new BigDecimal(1000);
-        Account account = new Account("2", CLIENT, newBalance);
+        Account account = Account.builder()
+                .id("2")
+                .number("2")
+                .client(CLIENT)
+                .balance(newBalance)
+                .build();
         accountRepository.modify(account);
-        Assert.assertEquals(account.getBalance(), accountRepository.findById(account.getNumber()).getBalance());
+        Assert.assertEquals(account.getBalance(), accountRepository.findById(account.getId()).getBalance());
     }
 
 }

@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.AccountFactory;
@@ -7,7 +8,13 @@ import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.util.AppConstants;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
@@ -34,7 +41,7 @@ public class AccountService {
 
     @DELETE
     @Path(AppConstants.PATH_DELETE)
-    public Response deleteClient(@QueryParam("id") String number) {
+    public Response deleteClient(@PathParam("id") String number) {
         return accountRepository.delete(number)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -42,9 +49,12 @@ public class AccountService {
 
     @POST
     @Path(AppConstants.PATH_INSERT)
-    public Account insertAccount(@QueryParam("clientId") String clientId, @QueryParam("balance") String balance) {
-        Client client = clientRepository.findById(clientId);
-        String accountId = accountRepository.insert(new Account(client, new BigDecimal(balance)));
+    public Account insertAccount(Account account) {
+        Client client = clientRepository.findById(account.getClient().getId());
+        if (client == null){
+            throw new TransferException(String.format(TransferException.CLIENT_NOT_FOUND_BY_ID, account.getClient().getId()));
+        }
+        String accountId = accountRepository.insert(account);
         return accountRepository.findById(accountId);
     }
 
