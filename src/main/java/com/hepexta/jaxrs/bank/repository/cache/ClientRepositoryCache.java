@@ -4,16 +4,16 @@ import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.Repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientRepositoryCache implements Repository<Client> {
 
     private AtomicInteger clientCounter = new AtomicInteger();
 
-    private Map<String, Client> clients = new HashMap<>();
+    private Map<String, Client> clients = new ConcurrentHashMap<>();
 
     private ClientRepositoryCache() {
     }
@@ -53,5 +53,10 @@ public class ClientRepositoryCache implements Repository<Client> {
     @Override
     public boolean delete(String id) {
         return clients.remove(id) != null;
+    }
+
+    public void clearCache(){
+        clients.clear();
+        clientCounter = new AtomicInteger();
     }
 }

@@ -1,17 +1,12 @@
 package com.hepexta.jaxrs.bank.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hepexta.jaxrs.bank.model.Client;
-import com.hepexta.jaxrs.bank.repository.Repository;
-import com.hepexta.jaxrs.service.ClientService;
+import com.hepexta.jaxrs.bank.repository.cache.ClientRepositoryCache;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.Whitebox;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -20,43 +15,80 @@ import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class ClientServiceTest extends JerseyTest {
 
     private final static String GET_LIST_ENDPOINT = "/client/list";
     private final static String INSERT_ENDPOINT = "/client/insert";
-    @Mock
-    private Repository<Client> repository;
-    private ClientService service;
+    private static final String DELETE_ENDPOINT = "/client/delete/%s";
+    private static final String MODIFY_ENDPOINT = "/client/modify/%s";
+    private final static int STATUS_OK = 200;
+
+    private ClientRepositoryCache clientRepository = ClientRepositoryCache.getINSTANCE();
+
+    @Before
+    public void init(){
+        clientRepository.clearCache();
+    }
 
     @Override
     public Application configure() {
         enable(TestProperties.LOG_TRAFFIC);
         enable(TestProperties.DUMP_ENTITY);
-        service = new ClientService();
-        repository = Mockito.mock(Repository.class);
-        Whitebox.setInternalState(service, "clientRepository", repository);
-        return new ResourceConfig(service.getClass());
+        return new ResourceConfig(ClientService.class);
     }
 
     @Test
-    public void givenNoClients_whenFetchAllClients_thanEmptyList() {
-        Response response = target(GET_LIST_ENDPOINT).request().get();
-        assertEquals("Status", 200, response.getStatus());
-        assertNotNull("Should return empty list", response.getEntity().toString());
+    public void givenNoClients_whenFetchAllClients_thenEmptyList() {
+        Response response = target(GET_LIST_ENDPOINT)
+                .request()
+                .get();
+
+        assertEquals(STATUS_OK, response.getStatus());
+        assertNotNull(response.getEntity().toString());
     }
 
     @Test
-    public void givenNoClients_whenInsertClient_thanClientCreated() throws JsonProcessingException {
-        String t = "1001";
-        ObjectMapper mapper = new ObjectMapper();
-        Mockito.when(repository.insert(Mockito.any(Client.class))).thenReturn(t);
+    public void givenNoClients_whenInsertClient_thenClientCreated() {
+        String expectedClientID = "1";
         Client client = Client.builder().name("TEST NAME").build();
-        Response response = target(INSERT_ENDPOINT).request().post(Entity.entity(mapper.writeValueAsString(client), MediaType.APPLICATION_JSON));
-        System.out.println(response.getEntity());
-        assertEquals("Status", 200, response.getStatus());
 
-        assertEquals("Should return empty list", t, response.getEntity().toString());
+        Response response = target(INSERT_ENDPOINT)
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(client, MediaType.APPLICATION_JSON));
+
+        Client result = response.readEntity(Client.class);
+        assertEquals(STATUS_OK, response.getStatus());
+        assertEquals(expectedClientID, result.getId());
+        assertEquals(client.getName(), result.getName());
+    }
+
+    @Test
+    public void givenClients_whenDeleteClient_thenClientDeleted() {
+        String clientId = clientRepository.insert(Client.builder().name("John Smith").build());
+
+        Response response = target(String.format(DELETE_ENDPOINT,clientId))
+                .request()
+                .delete();
+
+        assertEquals(STATUS_OK, response.getStatus());
+        assertTrue(clientRepository.getList().isEmpty());
+    }
+
+    @Test
+    public void givenClients_whenModifyClient_thenClientModified() {
+        String newName = "NEW NAME";
+        String oldName = "OLD NAME";
+        String clientId = clientRepository.insert(Client.builder().name(oldName).build());
+
+        Response response = target(String.format(MODIFY_ENDPOINT,clientId))
+                .request()
+                .put(Entity.entity(Client.builder().name(newName).build(), MediaType.APPLICATION_JSON));
+
+        assertEquals(STATUS_OK, response.getStatus());
+        assertEquals(1, clientRepository.getList().size());
+        assertEquals(newName, clientRepository.findById("1").getName());
     }
 }

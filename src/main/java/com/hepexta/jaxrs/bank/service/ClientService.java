@@ -1,5 +1,6 @@
-package com.hepexta.jaxrs.service;
+package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
@@ -11,6 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -38,7 +40,7 @@ public class ClientService {
 
     @DELETE
     @Path(AppConstants.PATH_DELETE)
-    public Response deleteClient(@QueryParam("id") String clientId) {
+    public Response deleteClient(@PathParam("id") String clientId) {
         return clientRepository.delete(clientId)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -52,10 +54,15 @@ public class ClientService {
         return clientRepository.findById(insertedClientId);
     }
 
-    @POST
+    @PUT
     @Path(AppConstants.PATH_MODIFY)
-    public Response modifyClient(@QueryParam("id") String id, @QueryParam("newName") String newName) {
-        return clientRepository.modify(new Client(id, newName))
+    public Response modifyClient(@PathParam("id") String id, Client newClient) {
+        Client client = clientRepository.findById(id);
+        if (client == null){
+            throw new TransferException(String.format(TransferException.CLIENT_NOT_FOUND_BY_ID, id));
+        }
+        newClient.setId(id);
+        return clientRepository.modify(newClient)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }

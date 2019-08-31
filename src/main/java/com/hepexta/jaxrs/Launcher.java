@@ -32,7 +32,6 @@ public class Launcher {
         Context context = tomcat.addContext(contextPath, appBase);
         Tomcat.addServlet(context, JERSEY_SERVLET_NAME, new ServletContainer(new JerseyConfiguration()));
         context.addServletMappingDecoded(CONTEXT, JERSEY_SERVLET_NAME);
-
         tomcat.start();
         tomcat.getServer().await();
     }

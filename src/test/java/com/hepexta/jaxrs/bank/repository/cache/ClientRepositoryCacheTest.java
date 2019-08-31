@@ -10,9 +10,9 @@ public class ClientRepositoryCacheTest {
 
     @Test
     public void testCreate() {
-        clientRepository.insert(new Client("John Smith"));
-        clientRepository.insert(new Client("Peter Parker"));
-        clientRepository.insert(new Client("Kate Wind"));
+        clientRepository.insert(Client.builder().name("John Smith 1").build());
+        clientRepository.insert(Client.builder().name("John Smith 2").build());
+        clientRepository.insert(Client.builder().name("John Smith 3").build());
 
         Assert.assertEquals(3, clientRepository.getList().size());
     }

@@ -1,4 +1,4 @@
-package com.hepexta.jaxrs.service;
+package com.hepexta.jaxrs.bank.service;
 
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;

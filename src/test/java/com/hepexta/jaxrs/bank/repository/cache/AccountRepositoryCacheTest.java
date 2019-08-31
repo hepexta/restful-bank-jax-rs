@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public class AccountRepositoryCacheTest {
 
     private AccountRepositoryCache accountRepository = AccountRepositoryCache.getINSTANCE();
-    private static final Client CLIENT = new Client("John Smith");
+    private static final Client CLIENT = Client.builder().name("John Smith").build();
 
     @Before
     public void setUp() {

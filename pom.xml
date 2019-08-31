@@ -3,16 +3,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.hepexta.restful</groupId>
-    <artifactId>bank-jaxrs</artifactId>
+    <artifactId>jaxrs</artifactId>
     <version>0.0.1</version>
 
     <properties>
         <tomcat.version>8.5.23</tomcat.version>
-        <jersey.version>2.26</jersey.version>
+        <jersey.version>2.27</jersey.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.8.4</jackson.version>
+        <jackson.version>2.8.10</jackson.version>
     </properties>
 
     <build>
@@ -74,6 +74,11 @@
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-base</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>7.0</version>
@@ -82,7 +87,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>

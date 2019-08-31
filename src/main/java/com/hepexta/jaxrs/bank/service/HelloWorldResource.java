@@ -1,4 +1,4 @@
-package com.hepexta.jaxrs.service;
+package com.hepexta.jaxrs.bank.service;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
