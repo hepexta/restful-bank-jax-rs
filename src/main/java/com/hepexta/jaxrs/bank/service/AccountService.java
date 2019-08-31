@@ -3,6 +3,7 @@ package com.hepexta.jaxrs.bank.service;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
+import com.hepexta.jaxrs.bank.model.OperationAmount;
 import com.hepexta.jaxrs.bank.repository.AccountFactory;
 import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
@@ -14,10 +15,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Path(AppConstants.PATH_ACCOUNT)
@@ -35,7 +34,7 @@ public class AccountService {
 
     @GET
     @Path(AppConstants.PATH_FIND_BY_ID)
-    public Account getClientById(@QueryParam("id") String id) {
+    public Account getClientById(@PathParam("id") String id) {
         return accountRepository.findById(id);
     }
 
@@ -60,17 +59,17 @@ public class AccountService {
 
     @POST
     @Path(AppConstants.PATH_DEPOSIT)
-    public Response deposit(@QueryParam("number") String number, @QueryParam("amount") BigDecimal amount) {
-        Account account = accountRepository.findById(number);
-        account.deposit(amount);
+    public Response deposit(OperationAmount operationAmount) {
+        Account account = accountRepository.findById(operationAmount.getId());
+        account.deposit(operationAmount.getAmount());
         return Response.status(Response.Status.OK).build();
     }
 
     @POST
     @Path(AppConstants.PATH_WITHDRAWAL)
-    public Response withdrawal(@QueryParam("number") String number, @QueryParam("amount") BigDecimal amount) {
-        Account account = accountRepository.findById(number);
-        account.withdraw(amount);
+    public Response withdrawal(OperationAmount operationAmount) {
+        Account account = accountRepository.findById(operationAmount.getId());
+        account.withdraw(operationAmount.getAmount());
         return Response.status(Response.Status.OK).build();
     }
 }

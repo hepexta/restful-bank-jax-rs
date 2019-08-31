@@ -34,7 +34,7 @@ public class ClientService {
 
     @GET
     @Path(AppConstants.PATH_FIND_BY_ID)
-    public Client getClientById(@QueryParam("id") String id) {
+    public Client getClientById(@PathParam("id") String id) {
         return clientRepository.findById(id);
     }
 
