@@ -20,8 +20,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,12 +137,12 @@ public class AccountServiceTest extends JerseyTest {
                 .id(account.getId())
                 .amount(depositAmount)
                 .build();
-        Response response = target(WITHDRAWAL_ENDPOINT)
+        Response response = target(DEPOSIT_ENDPOINT)
                 .request()
                 .post(Entity.entity(operationAmount, MediaType.APPLICATION_JSON));
         assertEquals(STATUS_OK, response.getStatus());
-        assertEquals(balance.subtract(depositAmount), account.getBalance());
-        verify(accountRepository, times(1)).modify(any());
+        assertEquals(balance.add(depositAmount), account.getBalance());
+        verify(accountRepository, atLeastOnce()).modify(any());
     }
 
     @Test
@@ -157,12 +157,12 @@ public class AccountServiceTest extends JerseyTest {
                 .id(account.getId())
                 .amount(depositAmount)
                 .build();
-        Response response = target(DEPOSIT_ENDPOINT)
+        Response response = target(WITHDRAWAL_ENDPOINT)
                 .request()
                 .post(Entity.entity(operationAmount, MediaType.APPLICATION_JSON));
         assertEquals(STATUS_OK, response.getStatus());
-        assertEquals(balance.add(depositAmount), account.getBalance());
-        verify(accountRepository, times(1)).modify(any());
+        assertEquals(balance.subtract(depositAmount), account.getBalance());
+        verify(accountRepository, atLeastOnce()).modify(any());
     }
 
     private Client prepareClient() {

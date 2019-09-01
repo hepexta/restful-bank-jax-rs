@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path(AppConstants.PATH_ACCOUNT)
@@ -68,7 +69,13 @@ public class AccountService {
     @Path(AppConstants.PATH_DEPOSIT)
     public Response deposit(OperationAmount operationAmount) {
         Account account = accountRepository.findById(operationAmount.getId());
-        account.deposit(operationAmount.getAmount());
+
+        if (operationAmount.getAmount().compareTo(BigDecimal.ZERO)>0) {
+            account.setBalance(account.getBalance().add(operationAmount.getAmount()));
+            accountRepository.modify(account);
+        } else {
+            throw new TransferException(String.format(TransferException.NOT_ENOUGH_MONEY_ERROR_DEPOSIT, account.getClient().getName()));
+        }
         return Response.status(Response.Status.OK).build();
     }
 
@@ -76,7 +83,13 @@ public class AccountService {
     @Path(AppConstants.PATH_WITHDRAWAL)
     public Response withdrawal(OperationAmount operationAmount) {
         Account account = accountRepository.findById(operationAmount.getId());
-        account.withdraw(operationAmount.getAmount());
+
+        if (account.getBalance().compareTo(operationAmount.getAmount())>=0) {
+            account.setBalance(account.getBalance().subtract(operationAmount.getAmount()));
+            accountRepository.modify(account);
+        } else {
+            throw new TransferException(String.format(TransferException.NOT_ENOUGH_MONEY_ERROR_WITHDRAWAL, account.getClient().getName()));
+        }
         return Response.status(Response.Status.OK).build();
     }
 }
