@@ -2,7 +2,6 @@ package com.hepexta.jaxrs.bank.service;
 
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Client;
-import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.util.AppConstants;
 
@@ -14,22 +13,24 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 
 @Path(AppConstants.PATH_CLIENT)
 @Produces(MediaType.APPLICATION_JSON)
 public class ClientService {
 
-    private Repository<Client> clientRepository = ClientFactory.getClientRepository();
+    private Repository<Client> clientRepository;
+
+    public ClientService(Repository<Client> clientRepository) {
+        this.clientRepository = clientRepository;
+    }
 
     @GET
     @Path(AppConstants.PATH_LIST)
     public List<Client> getClients() {
-        return new ArrayList<>(clientRepository.getList());
+        return clientRepository.getList();
     }
 
     @GET

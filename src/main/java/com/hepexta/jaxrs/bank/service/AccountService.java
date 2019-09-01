@@ -4,8 +4,6 @@ import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.model.OperationAmount;
-import com.hepexta.jaxrs.bank.repository.AccountFactory;
-import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.util.AppConstants;
 
@@ -23,8 +21,13 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountService {
 
-    private Repository<Account> accountRepository = AccountFactory.getAccountRepository();
-    private Repository<Client> clientRepository = ClientFactory.getClientRepository();
+    private final Repository<Account> accountRepository;
+    private final Repository<Client> clientRepository;
+
+    public AccountService(Repository<Account> accountRepository, Repository<Client> clientRepository) {
+        this.accountRepository = accountRepository;
+        this.clientRepository = clientRepository;
+    }
 
     @GET
     @Path(AppConstants.PATH_LIST)
@@ -40,8 +43,12 @@ public class AccountService {
 
     @DELETE
     @Path(AppConstants.PATH_DELETE)
-    public Response deleteClient(@PathParam("id") String number) {
-        return accountRepository.delete(number)
+    public Response deleteClient(@PathParam("id") String id) {
+        Account account = accountRepository.findById(id);
+        if (account == null){
+            throw new TransferException(String.format(TransferException.ACCOUNT_NOT_FOUND_BY_ID, id));
+        }
+        return accountRepository.delete(id)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
