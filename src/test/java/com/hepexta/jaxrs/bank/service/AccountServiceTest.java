@@ -3,13 +3,10 @@ package com.hepexta.jaxrs.bank.service;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.model.OperationAmount;
-import com.hepexta.jaxrs.bank.repository.ClientFactory;
 import com.hepexta.jaxrs.bank.repository.Repository;
-import com.hepexta.jaxrs.bank.repository.cache.AccountRepositoryCache;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
@@ -17,10 +14,16 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 public class AccountServiceTest extends JerseyTest {
@@ -33,37 +36,33 @@ public class AccountServiceTest extends JerseyTest {
     private static final String WITHDRAWAL_ENDPOINT = "/account/withdrawal";
     private final static int STATUS_OK = 200;
 
-    private AccountRepositoryCache accountRepository = AccountRepositoryCache.getINSTANCE();
-    private Repository<Client> clientRepository = ClientFactory.getClientRepository();
-
-    @Before
-    public void init(){
-        accountRepository.clearCache();
-    }
+    private static final Repository<Account> accountRepository = mock(Repository.class);
+    private static final Repository<Client> clientRepository = mock(Repository.class);
 
     @Override
     public Application configure() {
         enable(TestProperties.LOG_TRAFFIC);
         enable(TestProperties.DUMP_ENTITY);
-        return new ResourceConfig(AccountService.class);
+        return new ResourceConfig().register(new AccountService(accountRepository, clientRepository));
     }
 
     @Test
     public void givenNoAccounts_whenFetchAllAccounts_thenEmptyList() {
+        when(accountRepository.getList()).thenReturn(Collections.singletonList(prepareAccount()));
         Response response = target(GET_LIST_ENDPOINT)
                 .request()
                 .get();
 
+        List result = response.readEntity(List.class);
         assertEquals(STATUS_OK, response.getStatus());
-        assertNotNull(response.getEntity().toString());
+        assertEquals(1, result.size());
     }
 
     @Test
     public void givenAccounts_whenFetchById_thenAccountReturned() {
-        clientRepository.insert(prepareClient());
         Account account = prepareAccount();
-        String accountId = accountRepository.insert(account);
-        Response response = target(String.format(GET_BY_ID_ENDPOINT, accountId))
+        when(accountRepository.findById(any())).thenReturn(account);
+        Response response = target(String.format(GET_BY_ID_ENDPOINT, account.getId()))
                 .request()
                 .get();
 
@@ -76,9 +75,10 @@ public class AccountServiceTest extends JerseyTest {
 
     @Test
     public void givenNoAccounts_whenInsertAccount_thenAccountCreated() {
-        String clientId = clientRepository.insert(prepareClient());
         Account account = prepareAccount();
-        account.getClient().setId(clientId);
+        when(clientRepository.findById(eq(account.getClient().getId()))).thenReturn(account.getClient());
+        when(accountRepository.insert(any(Account.class))).thenReturn(account.getId());
+        when(accountRepository.findById(eq(account.getId()))).thenReturn(account);
 
         Response response = target(INSERT_ENDPOINT)
                 .request(MediaType.APPLICATION_JSON)
@@ -92,64 +92,77 @@ public class AccountServiceTest extends JerseyTest {
 
     @Test
     public void givenAccounts_whenDeleteAccount_thenAccountDeleted() {
-        clientRepository.insert(prepareClient());
-        String accountId = accountRepository.insert(prepareAccount());
+        Account account = prepareAccount();
+        when(accountRepository.findById(eq(account.getId()))).thenReturn(account);
+        when(accountRepository.delete(eq(account.getId()))).thenReturn(true);
 
-        Response response = target(String.format(DELETE_ENDPOINT,accountId))
+        Response response = target(String.format(DELETE_ENDPOINT, account.getId()))
                 .request()
                 .delete();
 
         assertEquals(STATUS_OK, response.getStatus());
-        assertTrue(accountRepository.getList().isEmpty());
+    }
+
+    @Test
+    public void givenNoAccounts_whenDeleteAccount_thenException() {
+        Account account = prepareAccount();
+        when(accountRepository.findById(eq(account.getId()))).thenReturn(null);
+        Response response = target(String.format(DELETE_ENDPOINT, account.getId()))
+                .request()
+                .delete();
+
+        assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public void givenNoAccounts_whenInsertAccountWithInvalidClient_thenException() {
+        Account account = prepareAccount();
+        when(clientRepository.findById(eq(account.getClient().getId()))).thenReturn(null);
+        Response response = target(INSERT_ENDPOINT)
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(account, MediaType.APPLICATION_JSON));
+
+        assertEquals(500, response.getStatus());
     }
 
     @Test
     public void givenAccounts_whenDeposit_thenBalanceIncreased() {
-        clientRepository.insert(prepareClient());
         Account account = prepareAccount();
-        String accountId = accountRepository.insert(account);
+        when(clientRepository.findById(eq(account.getClient().getId()))).thenReturn(account.getClient());
+        when(accountRepository.findById(eq(account.getId()))).thenReturn(account);
+        when(accountRepository.modify(any())).thenReturn(true);
         BigDecimal balance = account.getBalance();
         BigDecimal depositAmount = BigDecimal.valueOf(100);
         OperationAmount operationAmount = OperationAmount.builder()
-                .id(accountId)
+                .id(account.getId())
                 .amount(depositAmount)
                 .build();
         Response response = target(WITHDRAWAL_ENDPOINT)
                 .request()
                 .post(Entity.entity(operationAmount, MediaType.APPLICATION_JSON));
         assertEquals(STATUS_OK, response.getStatus());
-        Account modifiedAccount = accountRepository.findById(accountId);
-        assertEquals(balance.subtract(depositAmount), modifiedAccount.getBalance());
+        assertEquals(balance.subtract(depositAmount), account.getBalance());
+        verify(accountRepository, times(1)).modify(any());
     }
 
     @Test
     public void givenAccounts_whenWithdrawal_thenBalanceDecreased() {
-        clientRepository.insert(prepareClient());
         Account account = prepareAccount();
-        String accountId = accountRepository.insert(account);
+        when(clientRepository.findById(eq(account.getClient().getId()))).thenReturn(account.getClient());
+        when(accountRepository.findById(eq(account.getId()))).thenReturn(account);
+        when(accountRepository.modify(any())).thenReturn(true);
         BigDecimal balance = account.getBalance();
         BigDecimal depositAmount = BigDecimal.valueOf(100);
         OperationAmount operationAmount = OperationAmount.builder()
-                .id(accountId)
+                .id(account.getId())
                 .amount(depositAmount)
                 .build();
         Response response = target(DEPOSIT_ENDPOINT)
                 .request()
                 .post(Entity.entity(operationAmount, MediaType.APPLICATION_JSON));
         assertEquals(STATUS_OK, response.getStatus());
-        Account modifiedAccount = accountRepository.findById(accountId);
-        assertEquals(balance.add(depositAmount), modifiedAccount.getBalance());
-    }
-
-    @Test
-    public void givenNoAccounts_whenInsertAccountWithInvalidClient_thenException() {
-        Account account = prepareAccount();
-
-        Response response = target(INSERT_ENDPOINT)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.entity(account, MediaType.APPLICATION_JSON));
-
-        assertEquals(500, response.getStatus());
+        assertEquals(balance.add(depositAmount), account.getBalance());
+        verify(accountRepository, times(1)).modify(any());
     }
 
     private Client prepareClient() {
@@ -162,6 +175,7 @@ public class AccountServiceTest extends JerseyTest {
     private Account prepareAccount() {
         BigDecimal balance = new BigDecimal(1000);
         return Account.builder()
+                .id("1")
                 .number("ACC001")
                 .client(prepareClient())
                 .balance(balance)
