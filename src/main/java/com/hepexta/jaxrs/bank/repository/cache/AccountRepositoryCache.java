@@ -4,8 +4,6 @@ import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.repository.Repository;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,12 +56,7 @@ public class AccountRepositoryCache implements Repository<Account> {
     }
 
     public void clear(){
-        accounts = new HashMap<>();
-        accountCounter = new AtomicInteger();
-    }
-
-    public void clearCache() {
-        accounts.clear();
+        accounts = new ConcurrentHashMap<>();
         accountCounter = new AtomicInteger();
     }
 }
