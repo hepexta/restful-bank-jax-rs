@@ -11,4 +11,7 @@ public class AppConstants {
     public static final String PATH_ACCOUNT = "/account";
     public static final String PATH_DEPOSIT = "/deposit";
     public static final String PATH_WITHDRAWAL = "/withdrawal";
+    public static final String PATH_TRANSACTION = "/transaction";
+    public static final String PATH_EXECUTE = "/execute";
+    public static final String PATH_FIND_BY_ACCOUNT_ID = "/findbyaccountid/{id}";
 }

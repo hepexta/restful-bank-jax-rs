@@ -35,8 +35,8 @@ public class ClientRepositoryDBTest {
                 Client.builder()
                         .name("Peter Pan")
                         .build());
-        Assert.assertEquals("4", clientId);
-        Assert.assertEquals(4, clientRepository.getList().size());
+        Assert.assertEquals("5", clientId);
+        Assert.assertEquals(5, clientRepository.getList().size());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class ClientRepositoryDBTest {
     @Test
     public void testDelete() {
         clientRepository.delete("1");
-        Assert.assertEquals(3, clientRepository.getList().size());
+        Assert.assertEquals(4, clientRepository.getList().size());
     }
 
     @Test

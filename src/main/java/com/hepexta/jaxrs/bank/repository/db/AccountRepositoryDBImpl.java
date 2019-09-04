@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hepexta.jaxrs.bank.repository.db.Queries.*;
+import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class AccountRepositoryDBImpl implements Repository<Account> {
 
@@ -83,15 +84,7 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
                 LOG.error("Error inserting account {}", model);
                 throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT);
             }
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    result = generatedKeys.getString(1);
-                } else {
-                    LOG.error("Error inserting account {}", model);
-                    throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT);
-                }
-            }
+            result = getId(stmt);
         } catch (SQLException e) {
             LOG.error("Error inserting account {}", model);
             throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT, e);

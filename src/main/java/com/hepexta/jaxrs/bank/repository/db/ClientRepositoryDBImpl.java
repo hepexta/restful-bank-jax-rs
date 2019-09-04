@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hepexta.jaxrs.bank.repository.db.Queries.*;
+import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class ClientRepositoryDBImpl implements Repository<Client> {
 
@@ -78,21 +79,13 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
             stmt.setString(1, model.getName());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
-                LOG.error("Error inserting account", model);
-                throw new TransferException("Error inserting account");
+                LOG.error("Error inserting client", model);
+                throw new TransferException("Error inserting client");
             }
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    result = generatedKeys.getString(1);
-                } else {
-                    LOG.error("Error inserting account. {}", model);
-                    throw new TransferException("Error inserting account");
-                }
-            }
+            result = getId(stmt);
         } catch (SQLException e) {
-            LOG.error("Error inserting account" + model);
-            throw new TransferException("Error inserting account", e);
+            LOG.error("Error inserting client" + model);
+            throw new TransferException("Error inserting client", e);
         }
 
         return result;
@@ -106,7 +99,7 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
             stmt.setString(2, model.getId());
             result = stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            LOG.error("Error updating account", e);
+            LOG.error("Error updating client", e);
         }
         return result;
     }
@@ -118,7 +111,7 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
              PreparedStatement stmt = prepareDeleteStmnt(conn, id)){
             result = stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            LOG.error("Error deleting account", e);
+            LOG.error("Error deleting client", e);
         }
         return result;
     }

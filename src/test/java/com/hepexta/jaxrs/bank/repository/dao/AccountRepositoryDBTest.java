@@ -38,8 +38,8 @@ public class AccountRepositoryDBTest {
                         .client(CLIENT)
                         .balance(new BigDecimal(1000))
                         .build());
-        Assert.assertEquals("4", accountId);
-        Assert.assertEquals(4, accountRepository.getList().size());
+        Assert.assertEquals("6", accountId);
+        Assert.assertEquals(6, accountRepository.getList().size());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class AccountRepositoryDBTest {
     @Test
     public void testDelete() {
         accountRepository.delete("1");
-        Assert.assertEquals(3, accountRepository.getList().size());
+        Assert.assertEquals(5, accountRepository.getList().size());
     }
 
     @Test
