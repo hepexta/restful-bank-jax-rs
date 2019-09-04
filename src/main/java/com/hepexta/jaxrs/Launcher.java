@@ -4,12 +4,21 @@ import com.hepexta.jaxrs.cfg.JerseyConfiguration;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.h2.tools.RunScript;
+
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import static com.hepexta.jaxrs.util.AppConstants.CONTEXT;
+import static com.hepexta.jaxrs.util.AppConstants.DB;
+import static com.hepexta.jaxrs.util.AppConstants.JERSEY_SERVLET_NAME;
+import static com.hepexta.jaxrs.util.AppConstants.PORT;
+import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
+import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class Launcher {
 
-    private static final String JERSEY_SERVLET_NAME = "jersey-container-servlet";
-    private static final String PORT = "8080";
-    private static final String CONTEXT = "/*";
 
     public static void main(String[] args) throws Exception {
         new Launcher().start();
@@ -17,10 +26,9 @@ public class Launcher {
 
     private void start() throws Exception {
 
-        String port = System.getenv("PORT");
-        if (port == null || port.isEmpty()) {
-            port = PORT;
-        }
+        String port = getPort();
+        setenv();
+        prepareDatabase();
 
         String contextPath = "";
         String appBase = ".";
@@ -34,5 +42,27 @@ public class Launcher {
         context.addServletMappingDecoded(CONTEXT, JERSEY_SERVLET_NAME);
         tomcat.start();
         tomcat.getServer().await();
+    }
+
+    private String getPort() {
+        String port = System.getProperty("PORT");
+        if (port == null || port.isEmpty()) {
+            port = PORT;
+        }
+        return port;
+    }
+
+    private void setenv() {
+        String env = System.getProperty("ENV");
+        if (env == null || env.isEmpty()) {
+            System.setProperty("ENV", DB);
+        }
+    }
+
+    private void prepareDatabase() {
+        String env = System.getProperty("ENV");
+        if (env.equals(DB)) {
+            dataBaseInit();
+        }
     }
 }

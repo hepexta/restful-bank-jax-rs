@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
+import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class TransactionRepositoryDBTest {
@@ -23,11 +25,8 @@ public class TransactionRepositoryDBTest {
 
     @BeforeClass
     public static void before() {
-        try (Connection conn = getConnection()) {
-            RunScript.execute(conn, new InputStreamReader(TransactionRepositoryDBTest.class.getResourceAsStream("/database.sql")));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        dataBaseInit();
+        dataBasePopulate();
     }
 
     @Test

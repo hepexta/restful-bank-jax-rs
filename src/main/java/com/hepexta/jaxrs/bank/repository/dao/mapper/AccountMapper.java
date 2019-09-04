@@ -12,7 +12,10 @@ public class AccountMapper implements ResultSetMapper<Account>{
         return Account.builder()
                 .id(resultSet.getString("ACCOUNTID"))
                 .number(resultSet.getString("NUMBER"))
-                .client(Client.builder().id(resultSet.getString("CLIENTID")).build())
+                .client(Client.builder()
+                        .id(resultSet.getString("CLIENTID"))
+                        .name(resultSet.getString("NAME"))
+                        .build())
                 .balance(resultSet.getBigDecimal("BALANCE"))
                 .build();
     }

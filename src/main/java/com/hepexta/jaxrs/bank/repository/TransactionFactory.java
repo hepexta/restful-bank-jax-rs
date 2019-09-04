@@ -10,18 +10,10 @@ import com.hepexta.jaxrs.bank.repository.db.TransactionRepositoryDBImpl;
 public class TransactionFactory {
 
     public static LockRepository<Account> getLockRepository() {
-        String env = System.getenv("ENV");
-        if(env != null) {
-           // return new ClientRepositoryDB();
-        }
         return AccountLockRepositoryDBImpl.getINSTANCE();
     }
 
     public static TransRepository<Transaction> getTransRepository() {
-        String env = System.getenv("ENV");
-        if(env != null) {
-            // return new ClientRepositoryDB();
-        }
         return TransactionRepositoryDBImpl.getINSTANCE();
     }
 }

@@ -2,6 +2,11 @@ package com.hepexta.jaxrs.util;
 
 public class AppConstants {
 
+    public static final String JERSEY_SERVLET_NAME = "jersey-container-servlet";
+    public static final String PORT = "8080";
+    public static final String DB = "db";
+    public static final String CONTEXT = "/*";
+    
     public static final String PATH_CLIENT = "/client";
     public static final String PATH_LIST = "/list";
     public static final String PATH_FIND_BY_ID = "/findbyid/{id}";

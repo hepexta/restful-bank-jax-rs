@@ -12,7 +12,7 @@ public class Utils {
     public static Properties loadConfig() {
 
         Properties properties = new Properties();
-        try (final InputStream fis = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties");){
+        try (final InputStream fis = Utils.class.getResourceAsStream("/database.properties")){
             properties.load(fis);
         } catch (IOException e) {
             e.printStackTrace();

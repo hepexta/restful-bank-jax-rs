@@ -4,17 +4,14 @@ import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.bank.repository.db.AccountRepositoryDBImpl;
-import org.h2.tools.RunScript;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
 
-import static com.hepexta.jaxrs.util.DBUtils.getConnection;
+import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
+import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 
 public class AccountRepositoryDBTest {
 
@@ -23,11 +20,8 @@ public class AccountRepositoryDBTest {
 
     @BeforeClass
     public static void before(){
-        try (Connection conn = getConnection()) {
-            RunScript.execute(conn, new InputStreamReader(AccountRepositoryDBTest.class.getResourceAsStream("/database.sql")));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        dataBaseInit();
+        dataBasePopulate();
     }
 
     @Test

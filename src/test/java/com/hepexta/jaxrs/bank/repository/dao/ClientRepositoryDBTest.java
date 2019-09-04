@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
+import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class ClientRepositoryDBTest {
@@ -22,11 +24,8 @@ public class ClientRepositoryDBTest {
 
     @BeforeClass
     public static void before(){
-        try (Connection conn = getConnection()) {
-            RunScript.execute(conn, new InputStreamReader(ClientRepositoryDBTest.class.getResourceAsStream("/database.sql")));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        dataBaseInit();
+        dataBasePopulate();
     }
 
     @Test

@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
+import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class LockRepositoryDBTest {
@@ -20,11 +22,8 @@ public class LockRepositoryDBTest {
 
     @BeforeClass
     public static void before(){
-        try (Connection conn = getConnection()) {
-            RunScript.execute(conn, new InputStreamReader(LockRepositoryDBTest.class.getResourceAsStream("/database.sql")));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        dataBaseInit();
+        dataBasePopulate();
     }
 
     @Test

@@ -2,13 +2,15 @@ package com.hepexta.jaxrs.bank.repository;
 
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.cache.ClientRepositoryCache;
+import com.hepexta.jaxrs.bank.repository.db.ClientRepositoryDBImpl;
+import com.hepexta.jaxrs.util.AppConstants;
 
 public class ClientFactory {
 
     public static Repository<Client> getClientRepository() {
-        String env = System.getenv("ENV");
-        if(env != null) {
-           // return new ClientRepositoryDB();
+        String env = System.getProperty("ENV");
+        if(env.equals(AppConstants.DB)) {
+            return ClientRepositoryDBImpl.getINSTANCE();
         }
         return ClientRepositoryCache.getINSTANCE();
     }
