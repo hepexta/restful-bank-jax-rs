@@ -68,28 +68,37 @@ public class AccountService {
     @POST
     @Path(AppConstants.PATH_DEPOSIT)
     public Response deposit(OperationAmount operationAmount) {
+
+        checkAmount(operationAmount.getAmount());
         Account account = accountRepository.findById(operationAmount.getId());
 
-        if (operationAmount.getAmount().compareTo(BigDecimal.ZERO)>0) {
-            account.setBalance(account.getBalance().add(operationAmount.getAmount()));
-            accountRepository.modify(account);
-        } else {
-            throw new TransferException(String.format(TransferException.NOT_ENOUGH_MONEY_ERROR_DEPOSIT, account.getClient().getName()));
-        }
+        account.setBalance(account.getBalance().add(operationAmount.getAmount()));
+        accountRepository.modify(account);
         return Response.status(Response.Status.OK).build();
     }
 
     @POST
     @Path(AppConstants.PATH_WITHDRAWAL)
     public Response withdrawal(OperationAmount operationAmount) {
-        Account account = accountRepository.findById(operationAmount.getId());
 
-        if (account.getBalance().compareTo(operationAmount.getAmount())>=0) {
-            account.setBalance(account.getBalance().subtract(operationAmount.getAmount()));
-            accountRepository.modify(account);
-        } else {
+        checkAmount(operationAmount.getAmount());
+        Account account = accountRepository.findById(operationAmount.getId());
+        checkBalance(operationAmount, account);
+
+        account.setBalance(account.getBalance().subtract(operationAmount.getAmount()));
+        accountRepository.modify(account);
+        return Response.status(Response.Status.OK).build();
+    }
+
+    private void checkAmount(BigDecimal operationAmount) {
+        if (operationAmount.compareTo(BigDecimal.ZERO)<=0) {
+            throw new TransferException(TransferException.AMOUNT_SHOULD_BE_GREATER_THAN_ZERO);
+        }
+    }
+
+    private void checkBalance(OperationAmount operationAmount, Account account) {
+        if (account.getBalance().compareTo(operationAmount.getAmount())<0) {
             throw new TransferException(String.format(TransferException.NOT_ENOUGH_MONEY_ERROR_WITHDRAWAL, account.getClient().getName()));
         }
-        return Response.status(Response.Status.OK).build();
     }
 }

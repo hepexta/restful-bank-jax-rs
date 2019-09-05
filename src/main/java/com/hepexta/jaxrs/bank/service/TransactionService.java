@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path(AppConstants.PATH_TRANSACTION)
@@ -40,6 +41,9 @@ public class TransactionService {
     @POST
     @Path(AppConstants.PATH_EXECUTE)
     public Response executeTransaction(Transaction transfer) {
+
+        checkInput(transfer);
+
         final Account sourceAccount = accountLockRepository.findByIdAndLock(transfer.getSourceAccountId());
         final Account destAccount = accountLockRepository.findByIdAndLock(transfer.getDestAccountId());
 
@@ -54,6 +58,16 @@ public class TransactionService {
         accountRepository.modify(destAccount);
 
         return Response.status(Response.Status.OK).build();
+    }
+
+    private void checkInput(Transaction transfer) {
+        if (transfer.getAmount().compareTo(BigDecimal.ZERO)<=0){
+            throw new TransferException(TransferException.AMOUNT_SHOULD_BE_GREATER_THAN_ZERO);
+        }
+
+        if (transfer.getSourceAccountId().equals(transfer.getDestAccountId())){
+            throw new TransferException(TransferException.ERROR_TRANSACTION_ACCOUNTS_ARE_EQUALS);
+        }
     }
 
     private void checkTransaction(Transaction transfer, Account sourceAccount, Account destAccount) {

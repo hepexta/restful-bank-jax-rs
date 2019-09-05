@@ -79,13 +79,13 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
             stmt.setString(1, model.getName());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
-                LOG.error("Error inserting client", model);
-                throw new TransferException("Error inserting client");
+                LOG.error("Error inserting client {}", model);
+                throw new TransferException(TransferException.ERROR_INSERTING_CLIENT);
             }
             result = getId(stmt);
         } catch (SQLException e) {
-            LOG.error("Error inserting client" + model);
-            throw new TransferException("Error inserting client", e);
+            LOG.error("Error inserting client {}", model);
+            throw new TransferException(TransferException.ERROR_INSERTING_CLIENT, e);
         }
 
         return result;

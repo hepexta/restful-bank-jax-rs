@@ -10,6 +10,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -19,6 +20,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -32,7 +35,6 @@ public class TransactionServiceTest extends JerseyTest {
 
     private final static String EXECUTE_ENDPOINT = "/transaction/execute";
     private final static String FIND_BY_ACCID_ENDPOINT = "/transaction/findbyaccountid/%s";
-    private final static int STATUS_OK = 200;
 
     private static final Repository<Account> accountRepository = mock(Repository.class);
     private static final LockRepository<Account> lockRepository = mock(LockRepository.class);
@@ -62,7 +64,7 @@ public class TransactionServiceTest extends JerseyTest {
                 .request()
                 .get();
 
-        assertEquals(STATUS_OK, response.getStatus());
+        assertEquals(OK.getStatusCode(), response.getStatus());
         verify(transRepository, times(1)).findByAccountId(any());
     }
 
@@ -86,10 +88,50 @@ public class TransactionServiceTest extends JerseyTest {
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
 
-        assertEquals(STATUS_OK, response.getStatus());
+        assertEquals(OK.getStatusCode(), response.getStatus());
         verify(accountRepository, times(2)).modify(any());
         verify(lockRepository, times(2)).findByIdAndLock(any());
         verify(transRepository, times(1)).insert(any());
+    }
+
+    @Test
+    public void givenTransactionWithNegativeAmount_whenInsertTransaction_thenException() {
+        Mockito.reset(accountRepository, lockRepository, transRepository);
+        Transaction transaction = Transaction.builder()
+                .sourceAccountId("FAKEID1")
+                .destAccountId("FAKEID2")
+                .amount(BigDecimal.valueOf(-1000))
+                .operDate(LocalDate.now())
+                .comment("COMMENT")
+                .build();
+        Response response = target(EXECUTE_ENDPOINT)
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        verify(accountRepository, times(0)).modify(any());
+        verify(lockRepository, times(0)).findByIdAndLock(any());
+        verify(transRepository, times(0)).insert(any());
+    }
+
+    @Test
+    public void givenTransactionOnSameAccount_whenInsertTransaction_thenException() {
+        Mockito.reset(accountRepository, lockRepository, transRepository);
+        Transaction transaction = Transaction.builder()
+                .sourceAccountId("FAKEID")
+                .destAccountId("FAKEID")
+                .amount(BigDecimal.valueOf(1000))
+                .operDate(LocalDate.now())
+                .comment("COMMENT")
+                .build();
+        Response response = target(EXECUTE_ENDPOINT)
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+
+        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        verify(accountRepository, times(0)).modify(any());
+        verify(lockRepository, times(0)).findByIdAndLock(any());
+        verify(transRepository, times(0)).insert(any());
     }
 
     private Account prepareAccount(String accId) {
