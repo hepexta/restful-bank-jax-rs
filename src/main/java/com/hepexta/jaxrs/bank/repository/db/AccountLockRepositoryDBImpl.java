@@ -17,7 +17,7 @@ import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_FIN
 public class AccountLockRepositoryDBImpl implements LockRepository<Account> {
 
     private final static Logger LOG = LoggerFactory.getLogger(AccountLockRepositoryDBImpl.class);
-    private ResultSetMapper<Account> mapper = new AccountMapper();
+    private ResultSetMapper<Account> mapper = new AccountLockMapper();
     private static AccountLockRepositoryDBImpl INSTANCE;
 
     private AccountLockRepositoryDBImpl() {
