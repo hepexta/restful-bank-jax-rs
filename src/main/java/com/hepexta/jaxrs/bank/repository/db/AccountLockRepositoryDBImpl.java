@@ -1,7 +1,7 @@
 package com.hepexta.jaxrs.bank.repository.db;
 
 import com.hepexta.jaxrs.bank.model.Account;
-import com.hepexta.jaxrs.bank.repository.dao.mapper.AccountMapper;
+import com.hepexta.jaxrs.bank.repository.dao.mapper.AccountLockMapper;
 import com.hepexta.jaxrs.bank.repository.dao.mapper.ResultSetMapper;
 import com.hepexta.jaxrs.util.DBUtils;
 import org.slf4j.Logger;
