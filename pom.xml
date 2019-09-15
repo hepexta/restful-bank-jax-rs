@@ -19,6 +19,7 @@
         <slf4j-simple.version>1.7.7</slf4j-simple.version>
         <junit.version>4.12</junit.version>
         <mockito-all.version>1.9.5</mockito-all.version>
+        <hikari.version>2.6.1</hikari.version>
     </properties>
 
     <build>
@@ -128,6 +129,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>${h2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
         </dependency>
 
         <dependency>
