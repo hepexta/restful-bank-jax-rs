@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
@@ -32,7 +33,7 @@ public class AccountService {
 
     @GET
     @Path(AppConstants.PATH_LIST)
-    public List<Account> getClients() {
+    public List<Account> getAccounts() {
         return accountRepository.getList();
     }
 
@@ -46,9 +47,7 @@ public class AccountService {
     @Path(AppConstants.PATH_DELETE)
     public Response deleteClient(@PathParam("id") String id) {
         Account account = accountRepository.findById(id);
-        if (account == null){
-            throw new TransferException(String.format(TransferException.ACCOUNT_NOT_FOUND_BY_ID, id));
-        }
+        TransferException.shootIf(account == null, ErrorMessage.ERROR_520, id);
         return accountRepository.delete(id)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -58,9 +57,7 @@ public class AccountService {
     @Path(AppConstants.PATH_INSERT)
     public Account insertAccount(Account account) {
         Client client = clientRepository.findById(account.getClient().getId());
-        if (client == null){
-            throw new TransferException(String.format(TransferException.CLIENT_NOT_FOUND_BY_ID, account.getClient().getId()));
-        }
+        TransferException.shootIf(client == null, ErrorMessage.ERROR_522, account.getClient().getId());
         String accountId = accountRepository.insert(account);
         return accountRepository.findById(accountId);
     }
@@ -91,14 +88,10 @@ public class AccountService {
     }
 
     private void checkAmount(BigDecimal operationAmount) {
-        if (operationAmount.compareTo(BigDecimal.ZERO)<=0) {
-            throw new TransferException(TransferException.AMOUNT_SHOULD_BE_GREATER_THAN_ZERO);
-        }
+        TransferException.shootIf(operationAmount.compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
     }
 
     private void checkBalance(OperationAmount operationAmount, Account account) {
-        if (account.getBalance().compareTo(operationAmount.getAmount())<0) {
-            throw new TransferException(String.format(TransferException.NOT_ENOUGH_MONEY_ERROR_WITHDRAWAL, account.getClient().getName()));
-        }
+        TransferException.shootIf(account.getBalance().compareTo(operationAmount.getAmount())<0, ErrorMessage.ERROR_524, account.getId());
     }
 }

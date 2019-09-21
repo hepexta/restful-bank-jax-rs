@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.repository.db;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.Repository;
@@ -22,48 +23,48 @@ import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class ClientRepositoryDBImpl implements Repository<Client> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientRepositoryDBImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientRepositoryDBImpl.class);
     private ResultSetMapper<Client> mapper = new ClientMapper();
-    private static ClientRepositoryDBImpl INSTANCE;
+    private static ClientRepositoryDBImpl instance;
 
     private ClientRepositoryDBImpl() {
     }
 
-    public static ClientRepositoryDBImpl getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new ClientRepositoryDBImpl();
+    public static ClientRepositoryDBImpl getInstance(){
+        if (instance ==null){
+            instance = new ClientRepositoryDBImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override
     public List<Client> getList() {
-        List<Client> accounts = new ArrayList<>();
+        List<Client> clients = new ArrayList<>();
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(QUERY_CBS_CLIENT_GET_LIST);
              ResultSet resultSet =  stmt.executeQuery()){
             while (resultSet.next()) {
-                accounts.add(mapper.map(resultSet));
+                clients.add(mapper.map(resultSet));
             }
         } catch (SQLException e) {
             LOG.error("Error getting data", e);
         }
-        return accounts;
+        return clients;
     }
 
     @Override
     public Client findById(String id) {
-        Client accounts = null;
+        Client clients = null;
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = prepareFindByIdStmnt(conn, id);
              ResultSet resultSet =  stmt.executeQuery()){
             if (resultSet.next()) {
-                accounts = mapper.map(resultSet);
+                clients = mapper.map(resultSet);
             }
         } catch (SQLException e) {
             LOG.error("Error getting data", e);
         }
-        return accounts;
+        return clients;
     }
 
     private PreparedStatement prepareFindByIdStmnt(Connection conn, String id) throws SQLException {
@@ -80,12 +81,11 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
                 LOG.error("Error inserting client {}", model);
-                throw new TransferException(TransferException.ERROR_INSERTING_CLIENT);
+                throw new TransferException(ErrorMessage.ERROR_526);
             }
             result = getId(stmt);
         } catch (SQLException e) {
-            LOG.error("Error inserting client {}", model);
-            throw new TransferException(TransferException.ERROR_INSERTING_CLIENT, e);
+            throw new TransferException(ErrorMessage.ERROR_526, e);
         }
 
         return result;

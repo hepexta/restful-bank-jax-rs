@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.repository.db;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.repository.Repository;
@@ -22,18 +23,18 @@ import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class AccountRepositoryDBImpl implements Repository<Account> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountRepositoryDBImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountRepositoryDBImpl.class);
     private ResultSetMapper<Account> mapper = new AccountMapper();
-    private static AccountRepositoryDBImpl INSTANCE;
+    private static AccountRepositoryDBImpl instance;
 
     private AccountRepositoryDBImpl() {
     }
 
-    public static AccountRepositoryDBImpl getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new AccountRepositoryDBImpl();
+    public static AccountRepositoryDBImpl getInstance(){
+        if (instance ==null){
+            instance = new AccountRepositoryDBImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override
@@ -82,12 +83,12 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
                 LOG.error("Error inserting account {}", model);
-                throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT);
+                throw new TransferException(ErrorMessage.ERROR_525);
             }
             result = getId(stmt);
         } catch (SQLException e) {
             LOG.error("Error inserting account {}", model);
-            throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT, e);
+            throw new TransferException(ErrorMessage.ERROR_525, e);
         }
 
         return result;

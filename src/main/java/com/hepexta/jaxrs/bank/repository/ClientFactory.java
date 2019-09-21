@@ -10,7 +10,7 @@ public class ClientFactory {
     public static Repository<Client> getClientRepository() {
         String env = System.getProperty("ENV");
         if(env.equals(AppConstants.DB)) {
-            return ClientRepositoryDBImpl.getINSTANCE();
+            return ClientRepositoryDBImpl.getInstance();
         }
         return ClientRepositoryCache.getINSTANCE();
     }

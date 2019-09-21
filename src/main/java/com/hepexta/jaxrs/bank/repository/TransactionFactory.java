@@ -14,6 +14,6 @@ public class TransactionFactory {
     }
 
     public static TransRepository<Transaction> getTransRepository() {
-        return TransactionRepositoryDBImpl.getINSTANCE();
+        return TransactionRepositoryDBImpl.getInstance();
     }
 }

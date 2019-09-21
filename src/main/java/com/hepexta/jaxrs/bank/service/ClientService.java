@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.Repository;
@@ -59,9 +60,7 @@ public class ClientService {
     @Path(AppConstants.PATH_MODIFY)
     public Response modifyClient(@PathParam("id") String id, Client newClient) {
         Client client = clientRepository.findById(id);
-        if (client == null){
-            throw new TransferException(String.format(TransferException.CLIENT_NOT_FOUND_BY_ID, id));
-        }
+        TransferException.shootIf(client == null, ErrorMessage.ERROR_522, id);
         newClient.setId(id);
         return clientRepository.modify(newClient)
                 ? Response.status(Response.Status.OK).build()

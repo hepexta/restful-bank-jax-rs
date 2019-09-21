@@ -1,5 +1,7 @@
 package com.hepexta.jaxrs.util;
 
+import com.hepexta.jaxrs.bank.ex.DatabaseException;
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -38,7 +40,7 @@ public class DBUtils {
         try (Connection conn = getConnection()) {
             RunScript.execute(conn, new InputStreamReader(DBUtils.class.getResourceAsStream("/database.sql")));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DatabaseException(e);
         }
     }
 
@@ -46,7 +48,7 @@ public class DBUtils {
         try (Connection conn = getConnection()) {
             RunScript.execute(conn, new InputStreamReader(DBUtils.class.getResourceAsStream("/database_populate.sql")));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DatabaseException(e);
         }
     }
 
@@ -56,7 +58,7 @@ public class DBUtils {
             if (generatedKeys.next()) {
                 result = generatedKeys.getString(1);
             } else {
-                throw new TransferException(TransferException.ERROR_INSERTING_ACCOUNT);
+                throw new TransferException(ErrorMessage.ERROR_532);
             }
         }
         return result;

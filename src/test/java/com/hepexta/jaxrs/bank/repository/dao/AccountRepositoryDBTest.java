@@ -15,7 +15,7 @@ import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 
 public class AccountRepositoryDBTest {
 
-    private Repository<Account> accountRepository = AccountRepositoryDBImpl.getINSTANCE();
+    private Repository<Account> accountRepository = AccountRepositoryDBImpl.getInstance();
     private static final Client CLIENT = Client.builder().name("John Smith").id("1").build();
 
     @BeforeClass

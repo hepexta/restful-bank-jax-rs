@@ -1,5 +1,7 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
+import com.hepexta.jaxrs.bank.ex.TransactionExceptionHandler;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -35,7 +37,9 @@ public class ClientServiceTest extends JerseyTest {
     public Application configure() {
         enable(TestProperties.LOG_TRAFFIC);
         enable(TestProperties.DUMP_ENTITY);
-        return new ResourceConfig().register(new ClientService(clientRepository));
+        return new ResourceConfig()
+                .register(TransactionExceptionHandler.class)
+                .register(new ClientService(clientRepository));
     }
 
     @Test
@@ -108,7 +112,7 @@ public class ClientServiceTest extends JerseyTest {
         Response response = target(String.format(MODIFY_ENDPOINT, "fakeId"))
                 .request()
                 .put(Entity.entity(Client.builder().build(), MediaType.APPLICATION_JSON));
-        assertEquals(500, response.getStatus());
+        assertEquals(ErrorMessage.ERROR_522.getCode(), response.getStatus());
     }
 
     private Client prepareClient() {

@@ -1,5 +1,7 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
+import com.hepexta.jaxrs.bank.ex.TransactionExceptionHandler;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.model.OperationAmount;
@@ -43,7 +45,9 @@ public class AccountServiceTest extends JerseyTest {
     public Application configure() {
         enable(TestProperties.LOG_TRAFFIC);
         enable(TestProperties.DUMP_ENTITY);
-        return new ResourceConfig().register(new AccountService(accountRepository, clientRepository));
+        return new ResourceConfig()
+                .register(TransactionExceptionHandler.class)
+                .register(new AccountService(accountRepository, clientRepository));
     }
 
     @Test
@@ -111,7 +115,7 @@ public class AccountServiceTest extends JerseyTest {
                 .request()
                 .delete();
 
-        assertEquals(500, response.getStatus());
+        assertEquals(ErrorMessage.ERROR_520.getCode(), response.getStatus());
     }
 
     @Test
@@ -122,7 +126,7 @@ public class AccountServiceTest extends JerseyTest {
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(account, MediaType.APPLICATION_JSON));
 
-        assertEquals(500, response.getStatus());
+        assertEquals(ErrorMessage.ERROR_522.getCode(), response.getStatus());
     }
 
     @Test

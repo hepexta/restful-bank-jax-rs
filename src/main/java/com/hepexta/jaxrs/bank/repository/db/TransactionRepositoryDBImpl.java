@@ -1,5 +1,6 @@
 package com.hepexta.jaxrs.bank.repository.db;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Transaction;
 import com.hepexta.jaxrs.bank.repository.dao.mapper.ResultSetMapper;
@@ -22,18 +23,18 @@ import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class TransactionRepositoryDBImpl implements TransRepository<Transaction> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TransactionRepositoryDBImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionRepositoryDBImpl.class);
     private ResultSetMapper<Transaction> mapper = new TransactionMapper();
-    private static TransactionRepositoryDBImpl INSTANCE;
+    private static TransactionRepositoryDBImpl instance;
 
     private TransactionRepositoryDBImpl() {
     }
 
-    public static TransactionRepositoryDBImpl getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new TransactionRepositoryDBImpl();
+    public static TransactionRepositoryDBImpl getInstance(){
+        if (instance ==null){
+            instance = new TransactionRepositoryDBImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override
@@ -63,13 +64,13 @@ public class TransactionRepositoryDBImpl implements TransRepository<Transaction>
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
                 LOG.error("Error inserting transaction {}", model);
-                throw new TransferException(TransferException.ERROR_INSERTING_TRANSACTION);
+                throw new TransferException(ErrorMessage.ERROR_527);
             }
 
             result = getId(stmt);
         } catch (SQLException e) {
             LOG.error("Error inserting transaction {}", model);
-            throw new TransferException(TransferException.ERROR_INSERTING_TRANSACTION, e);
+            throw new TransferException(ErrorMessage.ERROR_527, e);
         }
 
         return result;

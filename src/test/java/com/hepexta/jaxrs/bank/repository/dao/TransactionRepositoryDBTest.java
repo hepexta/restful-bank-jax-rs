@@ -3,25 +3,20 @@ package com.hepexta.jaxrs.bank.repository.dao;
 import com.hepexta.jaxrs.bank.model.Transaction;
 import com.hepexta.jaxrs.bank.repository.db.TransRepository;
 import com.hepexta.jaxrs.bank.repository.db.TransactionRepositoryDBImpl;
-import org.h2.tools.RunScript;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
 import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
-import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class TransactionRepositoryDBTest {
 
-    private TransRepository<Transaction> transRepository = TransactionRepositoryDBImpl.getINSTANCE();
+    private TransRepository<Transaction> transRepository = TransactionRepositoryDBImpl.getInstance();
 
     @BeforeClass
     public static void before() {

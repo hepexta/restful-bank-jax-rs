@@ -10,7 +10,7 @@ public class AccountFactory {
     public static Repository<Account> getAccountRepository() {
         String env = System.getProperty("ENV");
         if(env.equals(AppConstants.DB)) {
-            return AccountRepositoryDBImpl.getINSTANCE();
+            return AccountRepositoryDBImpl.getInstance();
         }
         return AccountRepositoryCache.getINSTANCE();
     }

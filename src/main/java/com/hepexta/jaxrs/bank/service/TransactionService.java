@@ -1,10 +1,11 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Transaction;
-import com.hepexta.jaxrs.bank.repository.db.LockRepository;
 import com.hepexta.jaxrs.bank.repository.Repository;
+import com.hepexta.jaxrs.bank.repository.db.LockRepository;
 import com.hepexta.jaxrs.bank.repository.db.TransRepository;
 import com.hepexta.jaxrs.util.AppConstants;
 
@@ -61,26 +62,13 @@ public class TransactionService {
     }
 
     private void checkInput(Transaction transfer) {
-        if (transfer.getAmount().compareTo(BigDecimal.ZERO)<=0){
-            throw new TransferException(TransferException.AMOUNT_SHOULD_BE_GREATER_THAN_ZERO);
-        }
-
-        if (transfer.getSourceAccountId().equals(transfer.getDestAccountId())){
-            throw new TransferException(TransferException.ERROR_TRANSACTION_ACCOUNTS_ARE_EQUALS);
-        }
+        TransferException.shootIf(transfer.getAmount().compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
+        TransferException.shootIf(transfer.getSourceAccountId().equals(transfer.getDestAccountId()), ErrorMessage.ERROR_528);
     }
 
     private void checkTransaction(Transaction transfer, Account sourceAccount, Account destAccount) {
-        if (sourceAccount == null) {
-            throw new TransferException(String.format("Source account not found by ID %s",transfer.getSourceAccountId()));
-        }
-
-        if (destAccount == null) {
-            throw new TransferException(String.format("Destination account not found ID %s", transfer.getSourceAccountId()));
-        }
-
-        if (transfer.getAmount().compareTo(sourceAccount.getBalance())>0){
-            throw new TransferException("Not enough funds for transfer");
-        }
+        TransferException.shootIf(sourceAccount == null, ErrorMessage.ERROR_529);
+        TransferException.shootIf(destAccount == null, ErrorMessage.ERROR_530);
+        TransferException.shootIf(transfer.getAmount().compareTo(sourceAccount.getBalance())>0, ErrorMessage.ERROR_531);
     }
 }

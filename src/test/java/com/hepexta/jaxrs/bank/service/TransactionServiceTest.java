@@ -1,5 +1,7 @@
 package com.hepexta.jaxrs.bank.service;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
+import com.hepexta.jaxrs.bank.ex.TransactionExceptionHandler;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
 import com.hepexta.jaxrs.bank.model.Transaction;
@@ -20,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -44,7 +45,9 @@ public class TransactionServiceTest extends JerseyTest {
     public Application configure() {
         enable(TestProperties.LOG_TRAFFIC);
         enable(TestProperties.DUMP_ENTITY);
-        return new ResourceConfig().register(new TransactionService(accountRepository, lockRepository, transRepository));
+        return new ResourceConfig()
+                .register(TransactionExceptionHandler.class)
+                .register(new TransactionService(accountRepository, lockRepository, transRepository));
     }
 
     @Test
@@ -95,7 +98,7 @@ public class TransactionServiceTest extends JerseyTest {
     }
 
     @Test
-    public void givenTransactionWithNegativeAmount_whenInsertTransaction_thenException() {
+    public void givenTransactionWithNegativeAmount_whenExecuteTransaction_thenError() {
         Mockito.reset(accountRepository, lockRepository, transRepository);
         Transaction transaction = Transaction.builder()
                 .sourceAccountId("FAKEID1")
@@ -105,17 +108,19 @@ public class TransactionServiceTest extends JerseyTest {
                 .comment("COMMENT")
                 .build();
         Response response = target(EXECUTE_ENDPOINT)
-                .request(MediaType.APPLICATION_JSON)
+                .request()
                 .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
 
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(ErrorMessage.ERROR_521.getCode(), response.getStatus());
+        assertEquals(ErrorMessage.ERROR_521.getMessage(), response.getStatusInfo().getReasonPhrase());
+        assertEquals(ErrorMessage.ERROR_521.getMessage(), response.readEntity(String.class));
         verify(accountRepository, times(0)).modify(any());
         verify(lockRepository, times(0)).findByIdAndLock(any());
         verify(transRepository, times(0)).insert(any());
     }
 
     @Test
-    public void givenTransactionOnSameAccount_whenInsertTransaction_thenException() {
+    public void givenTransactionOnSameAccount_whenExecuteTransaction_thenError() {
         Mockito.reset(accountRepository, lockRepository, transRepository);
         Transaction transaction = Transaction.builder()
                 .sourceAccountId("FAKEID")
@@ -128,7 +133,7 @@ public class TransactionServiceTest extends JerseyTest {
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
 
-        assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(ErrorMessage.ERROR_528.getCode(), response.getStatus());
         verify(accountRepository, times(0)).modify(any());
         verify(lockRepository, times(0)).findByIdAndLock(any());
         verify(transRepository, times(0)).insert(any());
