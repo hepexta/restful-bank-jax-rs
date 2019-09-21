@@ -27,7 +27,7 @@ public class TransferException extends RuntimeException {
         return this.errorCode;
     }
 
-    public static void shootIf(boolean condition, ErrorMessage errorMessage, Object...params) {
+    public static void throwIf(boolean condition, ErrorMessage errorMessage, Object...params) {
         if (errorMessage==null){
             errorMessage = ErrorMessage.ERROR_500;
         }

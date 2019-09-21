@@ -60,7 +60,7 @@ public class ClientService {
     @Path(AppConstants.PATH_MODIFY)
     public Response modifyClient(@PathParam("id") String id, Client newClient) {
         Client client = clientRepository.findById(id);
-        TransferException.shootIf(client == null, ErrorMessage.ERROR_522, id);
+        TransferException.throwIf(client == null, ErrorMessage.ERROR_522, id);
         newClient.setId(id);
         return clientRepository.modify(newClient)
                 ? Response.status(Response.Status.OK).build()

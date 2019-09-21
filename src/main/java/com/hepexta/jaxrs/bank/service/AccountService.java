@@ -47,7 +47,7 @@ public class AccountService {
     @Path(AppConstants.PATH_DELETE)
     public Response deleteClient(@PathParam("id") String id) {
         Account account = accountRepository.findById(id);
-        TransferException.shootIf(account == null, ErrorMessage.ERROR_520, id);
+        TransferException.throwIf(account == null, ErrorMessage.ERROR_520, id);
         return accountRepository.delete(id)
                 ? Response.status(Response.Status.OK).build()
                 : Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -57,7 +57,7 @@ public class AccountService {
     @Path(AppConstants.PATH_INSERT)
     public Account insertAccount(Account account) {
         Client client = clientRepository.findById(account.getClient().getId());
-        TransferException.shootIf(client == null, ErrorMessage.ERROR_522, account.getClient().getId());
+        TransferException.throwIf(client == null, ErrorMessage.ERROR_522, account.getClient().getId());
         String accountId = accountRepository.insert(account);
         return accountRepository.findById(accountId);
     }
@@ -88,10 +88,10 @@ public class AccountService {
     }
 
     private void checkAmount(BigDecimal operationAmount) {
-        TransferException.shootIf(operationAmount.compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
+        TransferException.throwIf(operationAmount.compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
     }
 
     private void checkBalance(OperationAmount operationAmount, Account account) {
-        TransferException.shootIf(account.getBalance().compareTo(operationAmount.getAmount())<0, ErrorMessage.ERROR_524, account.getId());
+        TransferException.throwIf(account.getBalance().compareTo(operationAmount.getAmount())<0, ErrorMessage.ERROR_524, account.getId());
     }
 }

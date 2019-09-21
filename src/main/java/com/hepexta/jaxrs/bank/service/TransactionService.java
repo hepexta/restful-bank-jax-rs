@@ -46,9 +46,11 @@ public class TransactionService {
         checkInput(transfer);
 
         final Account sourceAccount = accountLockRepository.findByIdAndLock(transfer.getSourceAccountId());
-        final Account destAccount = accountLockRepository.findByIdAndLock(transfer.getDestAccountId());
+        TransferException.throwIf(sourceAccount == null, ErrorMessage.ERROR_529, transfer.getSourceAccountId());
+        TransferException.throwIf(transfer.getAmount().compareTo(sourceAccount.getBalance())>0, ErrorMessage.ERROR_531, sourceAccount.getId());
 
-        checkTransaction(transfer, sourceAccount, destAccount);
+        final Account destAccount = accountLockRepository.findByIdAndLock(transfer.getDestAccountId());
+        TransferException.throwIf(destAccount == null, ErrorMessage.ERROR_530, transfer.getDestAccountId());
 
         transactionRepository.insert(transfer);
 
@@ -62,13 +64,8 @@ public class TransactionService {
     }
 
     private void checkInput(Transaction transfer) {
-        TransferException.shootIf(transfer.getAmount().compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
-        TransferException.shootIf(transfer.getSourceAccountId().equals(transfer.getDestAccountId()), ErrorMessage.ERROR_528);
+        TransferException.throwIf(transfer.getAmount().compareTo(BigDecimal.ZERO)<=0, ErrorMessage.ERROR_521);
+        TransferException.throwIf(transfer.getSourceAccountId().equals(transfer.getDestAccountId()), ErrorMessage.ERROR_528);
     }
 
-    private void checkTransaction(Transaction transfer, Account sourceAccount, Account destAccount) {
-        TransferException.shootIf(sourceAccount == null, ErrorMessage.ERROR_529);
-        TransferException.shootIf(destAccount == null, ErrorMessage.ERROR_530);
-        TransferException.shootIf(transfer.getAmount().compareTo(sourceAccount.getBalance())>0, ErrorMessage.ERROR_531);
-    }
 }
