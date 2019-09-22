@@ -14,4 +14,5 @@ public interface ErrorMessageText {
     String ERROR_DEST_ACCOUNT_NOT_FOUND = "Destination account not found by ID %s";
     String NOT_ENOUGH_MONEY_ERROR_TRANSFER = "Account %s doesn't have enough money for transfer";
     String ERROR_INSERTING = "Error inserting";
+    String ACCOUNT_IS_BLOCKED = "Account %s is blocked";
 }

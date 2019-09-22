@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.hepexta.jaxrs.bank.repository.db.Queries.*;
@@ -55,6 +56,8 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
     @Override
     public Account findById(String id) {
         Account accounts = null;
+        long timestamp = new Date().getTime();
+        LOG.info("Account findById started:{} {}", id, timestamp);
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = prepareFindByIdStmnt(conn, id);
              ResultSet resultSet =  stmt.executeQuery()){
@@ -64,6 +67,7 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
         } catch (SQLException e) {
             LOG.error("Error getting data", e);
         }
+        LOG.info("Account findById finishes:{} {}", id, timestamp);
         return accounts;
     }
 
@@ -97,6 +101,7 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
     @Override
     public boolean modify(Account model) {
         boolean result = false;
+        LOG.info("Account modify started:{}", model);
         try (Connection conn = DBUtils.getConnection(); PreparedStatement stmt = conn.prepareStatement(QUERY_CBS_ACCOUNT_UPDATE)){
             stmt.setString(1, model.getNumber());
             stmt.setString(2, model.getClient().getId());
@@ -106,6 +111,7 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
         } catch (SQLException e) {
             LOG.error("Error updating account", e);
         }
+        LOG.info("Account modify finish:{}", model);
         return result;
     }
 

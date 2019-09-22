@@ -10,7 +10,7 @@ import com.hepexta.jaxrs.bank.repository.db.TransactionRepositoryDBImpl;
 public class TransactionFactory {
 
     public static LockRepository<Account> getLockRepository() {
-        return AccountLockRepositoryDBImpl.getINSTANCE();
+        return AccountLockRepositoryDBImpl.getInstance();
     }
 
     public static TransRepository<Transaction> getTransRepository() {

@@ -1,5 +1,7 @@
 package com.hepexta.jaxrs.bank.repository.db;
 
+import com.hepexta.jaxrs.bank.ex.ErrorMessage;
+import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.repository.dao.mapper.AccountLockMapper;
 import com.hepexta.jaxrs.bank.repository.dao.mapper.ResultSetMapper;
@@ -11,38 +13,60 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_FIND_BY_ID_AND_LOCK;
 
 public class AccountLockRepositoryDBImpl implements LockRepository<Account> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountLockRepositoryDBImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountLockRepositoryDBImpl.class);
     private ResultSetMapper<Account> mapper = new AccountLockMapper();
-    private static AccountLockRepositoryDBImpl INSTANCE;
+    private static AccountLockRepositoryDBImpl instance;
+    private final Set<String> localCache = new CopyOnWriteArraySet<>();
 
     private AccountLockRepositoryDBImpl() {
     }
 
-    public static AccountLockRepositoryDBImpl getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new AccountLockRepositoryDBImpl();
+    public static AccountLockRepositoryDBImpl getInstance(){
+        if (instance ==null){
+            instance = new AccountLockRepositoryDBImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override
     public Account findByIdAndLock(String id) {
-        Account accounts = null;
+        Account account = null;
+        long timestamp = new Date().getTime();
+        LOG.info("Account findById and Lock started:{} {}", id, timestamp);
+        TransferException.throwIf(putIfNotPresent(id), ErrorMessage.ERROR_533, id);
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = prepareFindByIdStmnt(conn, id);
              ResultSet resultSet =  stmt.executeQuery()){
             if (resultSet.next()) {
-                accounts = mapper.map(resultSet);
+                account = mapper.map(resultSet);
             }
         } catch (SQLException e) {
             LOG.error("Error getting data", e);
         }
-        return accounts;
+        LOG.info("Account findById and Lock finished:{} {}", account, timestamp);
+        return account;
+    }
+
+    @Override
+    public void unlock(String id) {
+        localCache.remove(id);
+    }
+
+    private boolean putIfNotPresent(String id) {
+        LOG.info("LocalCache {}", localCache);
+        boolean b = localCache.contains(id);
+        if (!b){
+            localCache.add(id);
+        }
+        return b;
     }
 
     private PreparedStatement prepareFindByIdStmnt(Connection conn, String id) throws SQLException {
