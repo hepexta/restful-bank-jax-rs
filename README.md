@@ -145,15 +145,15 @@ POST http://localhost:8080/account/insert
  
  And now we can transfer some money from account to account
  ```
- POST http://localhost:8080/transaction/execute
+ POST http://localhost:8080/transfer/execute
  {"sourceAccountId":"6", "destAccountId":"7", "operDate":"2019-09-04", "amount":1000, "comment":"Transfer for charity"}
  ```
 
- And then both can see this transaction in their lists:
+ And then both can see this transfer in their lists:
  
- `GET http://localhost:8080/transaction/findbyaccountid/6`
+ `GET http://localhost:8080/transfer/findbyaccountid/6`
  
- `GET http://localhost:8080/transaction/findbyaccountid/7`
+ `GET http://localhost:8080/transfer/findbyaccountid/7`
  
  ------------------------------------
  
@@ -183,8 +183,8 @@ POST http://localhost:8080/account/insert
   
   `POST http://localhost:8080/account/withdrawal`
   
-  `GET http://localhost:8080/transaction/findbyaccountid/{id}`
+  `GET http://localhost:8080/transfer/findbyaccountid/{id}`
   
-  `POST http://localhost:8080/transaction/execute`
+  `POST http://localhost:8080/transfer/execute`
   
  

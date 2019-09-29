@@ -4,7 +4,7 @@ import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransactionExceptionHandler;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Client;
-import com.hepexta.jaxrs.bank.model.Transaction;
+import com.hepexta.jaxrs.bank.model.Transfer;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.bank.repository.db.LockRepository;
 import com.hepexta.jaxrs.bank.repository.db.TransRepository;
@@ -32,14 +32,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class TransactionServiceTest extends JerseyTest {
+public class TransferServiceTest extends JerseyTest {
 
     private final static String EXECUTE_ENDPOINT = "/transaction/execute";
     private final static String FIND_BY_ACCID_ENDPOINT = "/transaction/findbyaccountid/%s";
 
     private static final Repository<Account> accountRepository = mock(Repository.class);
     private static final LockRepository<Account> lockRepository = mock(LockRepository.class);
-    private static final TransRepository<Transaction> transRepository = mock(TransRepository.class);
+    private static final TransRepository<Transfer> transRepository = mock(TransRepository.class);
 
     @Override
     public Application configure() {
@@ -47,14 +47,14 @@ public class TransactionServiceTest extends JerseyTest {
         enable(TestProperties.DUMP_ENTITY);
         return new ResourceConfig()
                 .register(TransactionExceptionHandler.class)
-                .register(new TransactionService(accountRepository, lockRepository, transRepository));
+                .register(new TransferService(accountRepository, lockRepository, transRepository));
     }
 
     @Test
     public void givenTransactions_whenFetchByAccount_thenReturned() {
         String id = "1";
         String sourceid = "SOURCEID";
-        Transaction transaction = Transaction.builder()
+        Transfer transfer = Transfer.builder()
                 .id(id)
                 .sourceAccountId(sourceid)
                 .destAccountId("DESTID")
@@ -62,7 +62,7 @@ public class TransactionServiceTest extends JerseyTest {
                 .operDate(LocalDate.now())
                 .comment("COMMENT")
                 .build();
-        when(transRepository.findByAccountId(eq(sourceid))).thenReturn(Collections.singletonList(transaction));
+        when(transRepository.findByAccountId(eq(sourceid))).thenReturn(Collections.singletonList(transfer));
         Response response = target(String.format(FIND_BY_ACCID_ENDPOINT, sourceid))
                 .request()
                 .get();
@@ -75,7 +75,7 @@ public class TransactionServiceTest extends JerseyTest {
     public void givenNoTransactions_whenInsertTransaction_thenTransactionCreated() {
         Account sourceAccount = prepareAccount("SOURCEID");
         Account destAccount = prepareAccount("DESTID");
-        Transaction transaction = Transaction.builder()
+        Transfer transfer = Transfer.builder()
                 .sourceAccountId(sourceAccount.getId())
                 .destAccountId(destAccount.getId())
                 .amount(BigDecimal.valueOf(1000))
@@ -83,13 +83,13 @@ public class TransactionServiceTest extends JerseyTest {
                 .comment("COMMENT")
                 .build();
         when(accountRepository.modify(any(Account.class))).thenReturn(true);
-        when(transRepository.insert(any(Transaction.class))).thenReturn("1");
+        when(transRepository.insert(any(Transfer.class))).thenReturn("1");
         when(lockRepository.findByIdAndLock(eq(sourceAccount.getId()))).thenReturn(sourceAccount);
         when(lockRepository.findByIdAndLock(eq(destAccount.getId()))).thenReturn(destAccount);
 
         Response response = target(EXECUTE_ENDPOINT)
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(transfer, MediaType.APPLICATION_JSON));
 
         assertEquals(OK.getStatusCode(), response.getStatus());
         verify(accountRepository, times(2)).modify(any());
@@ -100,7 +100,7 @@ public class TransactionServiceTest extends JerseyTest {
     @Test
     public void givenTransactionWithNegativeAmount_whenExecuteTransaction_thenError() {
         Mockito.reset(accountRepository, lockRepository, transRepository);
-        Transaction transaction = Transaction.builder()
+        Transfer transfer = Transfer.builder()
                 .sourceAccountId("FAKEID1")
                 .destAccountId("FAKEID2")
                 .amount(BigDecimal.valueOf(-1000))
@@ -109,7 +109,7 @@ public class TransactionServiceTest extends JerseyTest {
                 .build();
         Response response = target(EXECUTE_ENDPOINT)
                 .request()
-                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(transfer, MediaType.APPLICATION_JSON));
 
         assertEquals(ErrorMessage.ERROR_521.getCode(), response.getStatus());
         assertEquals(ErrorMessage.ERROR_521.getMessage(), response.getStatusInfo().getReasonPhrase());
@@ -122,7 +122,7 @@ public class TransactionServiceTest extends JerseyTest {
     @Test
     public void givenTransactionOnSameAccount_whenExecuteTransaction_thenError() {
         Mockito.reset(accountRepository, lockRepository, transRepository);
-        Transaction transaction = Transaction.builder()
+        Transfer transfer = Transfer.builder()
                 .sourceAccountId("FAKEID")
                 .destAccountId("FAKEID")
                 .amount(BigDecimal.valueOf(1000))
@@ -131,7 +131,7 @@ public class TransactionServiceTest extends JerseyTest {
                 .build();
         Response response = target(EXECUTE_ENDPOINT)
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+                .post(Entity.entity(transfer, MediaType.APPLICATION_JSON));
 
         assertEquals(ErrorMessage.ERROR_528.getCode(), response.getStatus());
         verify(accountRepository, times(0)).modify(any());

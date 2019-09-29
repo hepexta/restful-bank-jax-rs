@@ -9,7 +9,7 @@ public interface ErrorMessageText {
     String ERROR_INSERTING_ACCOUNT = "Error inserting account";
     String ERROR_INSERTING_CLIENT = "Error inserting client";
     String ERROR_INSERTING_TRANSACTION = "Error inserting transaction";
-    String ERROR_TRANSACTION_ACCOUNTS_ARE_EQUALS = "Transaction error. Source Account equals to Destination Account";
+    String ERROR_TRANSACTION_ACCOUNTS_ARE_EQUALS = "Transfer error. Source Account equals to Destination Account";
     String ERROR_SOURCE_ACCOUNT_NOT_FOUND = "Source account not found by ID %s";
     String ERROR_DEST_ACCOUNT_NOT_FOUND = "Destination account not found by ID %s";
     String NOT_ENOUGH_MONEY_ERROR_TRANSFER = "Account %s doesn't have enough money for transfer";

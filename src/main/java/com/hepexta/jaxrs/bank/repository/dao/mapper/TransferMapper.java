@@ -1,14 +1,14 @@
 package com.hepexta.jaxrs.bank.repository.dao.mapper;
 
-import com.hepexta.jaxrs.bank.model.Transaction;
+import com.hepexta.jaxrs.bank.model.Transfer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TransactionMapper implements ResultSetMapper<Transaction>{
+public class TransferMapper implements ResultSetMapper<Transfer>{
     @Override
-    public Transaction map(ResultSet resultSet) throws SQLException {
-        return Transaction.builder()
+    public Transfer map(ResultSet resultSet) throws SQLException {
+        return Transfer.builder()
                 .id(resultSet.getString("TRANSACTIONID"))
                 .sourceAccountId(resultSet.getString("SRCACCOUNTID"))
                 .destAccountId(resultSet.getString("DSTACCOUNTID"))

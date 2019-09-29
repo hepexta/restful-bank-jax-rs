@@ -23,7 +23,7 @@ import java.time.LocalDate;
 @Builder
 @JsonFormat
 @ToString
-public class Transaction {
+public class Transfer {
 
     @JsonProperty
     private String id;

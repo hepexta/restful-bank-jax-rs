@@ -2,9 +2,9 @@ package com.hepexta.jaxrs.bank.repository.db;
 
 import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
-import com.hepexta.jaxrs.bank.model.Transaction;
+import com.hepexta.jaxrs.bank.model.Transfer;
 import com.hepexta.jaxrs.bank.repository.dao.mapper.ResultSetMapper;
-import com.hepexta.jaxrs.bank.repository.dao.mapper.TransactionMapper;
+import com.hepexta.jaxrs.bank.repository.dao.mapper.TransferMapper;
 import com.hepexta.jaxrs.util.DBUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,39 +21,39 @@ import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_TRANSACTION
 import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_TRANSACTION_INSERT;
 import static com.hepexta.jaxrs.util.DBUtils.getId;
 
-public class TransactionRepositoryDBImpl implements TransRepository<Transaction> {
+public class TransferRepositoryDBImpl implements TransRepository<Transfer> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TransactionRepositoryDBImpl.class);
-    private ResultSetMapper<Transaction> mapper = new TransactionMapper();
-    private static TransactionRepositoryDBImpl instance;
+    private static final Logger LOG = LoggerFactory.getLogger(TransferRepositoryDBImpl.class);
+    private ResultSetMapper<Transfer> mapper = new TransferMapper();
+    private static TransferRepositoryDBImpl instance;
 
-    private TransactionRepositoryDBImpl() {
+    private TransferRepositoryDBImpl() {
     }
 
-    public static TransactionRepositoryDBImpl getInstance(){
+    public static TransferRepositoryDBImpl getInstance(){
         if (instance ==null){
-            instance = new TransactionRepositoryDBImpl();
+            instance = new TransferRepositoryDBImpl();
         }
         return instance;
     }
 
     @Override
-    public List<Transaction> findByAccountId(String id) {
-        List<Transaction> transactionList = new ArrayList<>();
+    public List<Transfer> findByAccountId(String id) {
+        List<Transfer> transferList = new ArrayList<>();
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = prepareFindByIdStmnt(conn, id);
              ResultSet resultSet =  stmt.executeQuery()){
             while (resultSet.next()) {
-                transactionList.add(mapper.map(resultSet));
+                transferList.add(mapper.map(resultSet));
             }
         } catch (SQLException e) {
             LOG.error("Error getting data", e);
         }
-        return transactionList;
+        return transferList;
     }
 
     @Override
-    public String insert(Transaction model) {
+    public String insert(Transfer model) {
         String result;
         try (Connection conn = DBUtils.getConnection(); PreparedStatement stmt = conn.prepareStatement(QUERY_CBS_TRANSACTION_INSERT, Statement.RETURN_GENERATED_KEYS)){
             stmt.setString(1, model.getSourceAccountId());
