@@ -15,6 +15,8 @@ public class TransferMapper implements ResultSetMapper<Transfer>{
                 .operDate(resultSet.getDate("OPERDATE").toLocalDate())
                 .amount(resultSet.getBigDecimal("AMOUNT"))
                 .comment(resultSet.getString("COMMENT"))
+                .status(resultSet.getString("STATUS"))
+                .message(resultSet.getString("MESSAGE"))
                 .build();
     }
 

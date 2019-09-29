@@ -18,7 +18,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hepexta.jaxrs.bank.repository.db.Queries.*;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_CLIENT_DELETE;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_CLIENT_FIND_BY_ID;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_CLIENT_GET_LIST;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_CLIENT_INSERT;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_CLIENT_UPDATE;
 import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class ClientRepositoryDBImpl implements Repository<Client> {
@@ -92,12 +96,14 @@ public class ClientRepositoryDBImpl implements Repository<Client> {
     }
 
     @Override
-    public boolean modify(Client model) {
-        boolean result = false;
+    public boolean modify(Client...model) {
+        boolean result = true;
         try (Connection conn = DBUtils.getConnection(); PreparedStatement stmt = conn.prepareStatement(QUERY_CBS_CLIENT_UPDATE)){
-            stmt.setString(1, model.getName());
-            stmt.setString(2, model.getId());
-            result = stmt.executeUpdate() == 1;
+            for (Client client : model) {
+                stmt.setString(1, client.getName());
+                stmt.setString(2, client.getId());
+                result &= stmt.executeUpdate() == 1;
+            }
         } catch (SQLException e) {
             LOG.error("Error updating client", e);
         }

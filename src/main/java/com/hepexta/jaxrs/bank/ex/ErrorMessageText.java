@@ -15,4 +15,5 @@ public interface ErrorMessageText {
     String NOT_ENOUGH_MONEY_ERROR_TRANSFER = "Account %s doesn't have enough money for transfer";
     String ERROR_INSERTING = "Error inserting";
     String ACCOUNT_IS_BLOCKED = "Account %s is blocked";
+    String DATABASE_ERROR = "DataBase Error %s";
 }

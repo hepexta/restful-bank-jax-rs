@@ -19,7 +19,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.hepexta.jaxrs.bank.repository.db.Queries.*;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_DELETE;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_FIND_BY_ID;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_GET_LIST;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_INSERT;
+import static com.hepexta.jaxrs.bank.repository.db.Queries.QUERY_CBS_ACCOUNT_UPDATE;
 import static com.hepexta.jaxrs.util.DBUtils.getId;
 
 public class AccountRepositoryDBImpl implements Repository<Account> {
@@ -99,19 +103,27 @@ public class AccountRepositoryDBImpl implements Repository<Account> {
     }
 
     @Override
-    public boolean modify(Account model) {
+    public boolean modify(Account...accounts) {
         boolean result = false;
-        LOG.info("Account modify started:{}", model);
+        LOG.info("Account modify started:{}", accounts);
         try (Connection conn = DBUtils.getConnection(); PreparedStatement stmt = conn.prepareStatement(QUERY_CBS_ACCOUNT_UPDATE)){
-            stmt.setString(1, model.getNumber());
-            stmt.setString(2, model.getClient().getId());
-            stmt.setBigDecimal(3, model.getBalance());
-            stmt.setString(4, model.getId());
-            result = stmt.executeUpdate() == 1;
+            conn.setAutoCommit(false);
+            for (Account account : accounts) {
+                if (Math.random()*10>9){
+                    throw new SQLException("Fake Error");
+                }
+                stmt.setString(1, account.getNumber());
+                stmt.setString(2, account.getClient().getId());
+                stmt.setBigDecimal(3, account.getBalance());
+                stmt.setString(4, account.getId());
+                result = stmt.executeUpdate() == 1;
+            }
+            conn.commit();
+            conn.setAutoCommit(true);
         } catch (SQLException e) {
-            LOG.error("Error updating account", e);
+            throw new TransferException(ErrorMessage.ERROR_534, e);
         }
-        LOG.info("Account modify finish:{}", model);
+        LOG.info("Account modify finish:{}", accounts);
         return result;
     }
 

@@ -1,6 +1,7 @@
 package com.hepexta.jaxrs.bank.repository.dao;
 
 import com.hepexta.jaxrs.bank.model.Transfer;
+import com.hepexta.jaxrs.bank.model.TransferStatus;
 import com.hepexta.jaxrs.bank.repository.db.TransRepository;
 import com.hepexta.jaxrs.bank.repository.db.TransferRepositoryDBImpl;
 import org.junit.Assert;
@@ -9,6 +10,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
@@ -33,8 +35,18 @@ public class TransferRepositoryDBTest {
                 .operDate(LocalDate.now())
                 .comment("COMMENT")
                 .build();
-        String accountId = transRepository.insert(transfer);
-        Assert.assertEquals("4", accountId);
+        String transferId = transRepository.insert(transfer);
+        Assert.assertEquals("4", transferId);
+    }
+
+    @Test
+    public void testUpdateStatus() {
+        String dateStr = new Date().toString();
+        transRepository.updateStatus("3", TransferStatus.SUCCESS, dateStr);
+        List<Transfer> transList = transRepository.findByAccountId("2");
+        Assert.assertEquals(1, transList.size());
+        Assert.assertEquals(TransferStatus.SUCCESS.getStatus(), transList.get(0).getStatus());
+        Assert.assertEquals(String.format(TransferStatus.SUCCESS.getMessage(), dateStr), transList.get(0).getMessage());
     }
 
     @Test

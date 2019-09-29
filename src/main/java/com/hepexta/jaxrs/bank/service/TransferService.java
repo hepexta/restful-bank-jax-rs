@@ -4,6 +4,7 @@ import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.model.Account;
 import com.hepexta.jaxrs.bank.model.Transfer;
+import com.hepexta.jaxrs.bank.model.TransferStatus;
 import com.hepexta.jaxrs.bank.repository.Repository;
 import com.hepexta.jaxrs.bank.repository.db.LockRepository;
 import com.hepexta.jaxrs.bank.repository.db.TransRepository;
@@ -19,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Path(AppConstants.PATH_TRANSACTION)
@@ -49,27 +51,37 @@ public class TransferService {
         LOG.info("executeTransfer started:{}", transfer);
         checkInput(transfer);
 
-        final Account sourceAccount = accountLockRepository.findByIdAndLock(transfer.getSourceAccountId());
-        final Account destAccount = accountLockRepository.findByIdAndLock(transfer.getDestAccountId());
+        accountLockRepository.lock(transfer.getSourceAccountId(), transfer.getDestAccountId());
         try {
+            Account sourceAccount = accountRepository.findById(transfer.getSourceAccountId());
+            Account destAccount = accountRepository.findById(transfer.getDestAccountId());
             TransferException.throwIf(sourceAccount == null, ErrorMessage.ERROR_529, transfer.getSourceAccountId());
             TransferException.throwIf(transfer.getAmount().compareTo(sourceAccount.getBalance()) > 0, ErrorMessage.ERROR_531, sourceAccount.getId());
             TransferException.throwIf(destAccount == null, ErrorMessage.ERROR_530, transfer.getDestAccountId());
 
-            transactionRepository.insert(transfer);
+            String transferId = transactionRepository.insert(transfer);
 
             sourceAccount.setBalance(sourceAccount.getBalance().subtract(transfer.getAmount()));
             destAccount.setBalance(destAccount.getBalance().add(transfer.getAmount()));
 
-            accountRepository.modify(sourceAccount);
-            accountRepository.modify(destAccount);
+            updateAccounts(sourceAccount, destAccount, transferId);
         }
         finally {
-            accountLockRepository.unlock(transfer.getSourceAccountId());
-            accountLockRepository.unlock(transfer.getDestAccountId());
+            accountLockRepository.unlock(transfer.getSourceAccountId(), transfer.getDestAccountId());
         }
         LOG.info("executeTransfer finished:{}", transfer);
         return Response.status(Response.Status.OK).build();
+    }
+
+    private void updateAccounts(Account sourceAccount, Account destAccount, String transferId) {
+        try {
+            accountRepository.modify(sourceAccount, destAccount);
+            transactionRepository.updateStatus(transferId, TransferStatus.SUCCESS, new Date().toString());
+        }
+        catch (TransferException te){
+            transactionRepository.updateStatus(transferId, TransferStatus.ERROR, te.getLocalizedMessage());
+            throw te;
+        }
     }
 
     private void checkInput(Transfer transfer) {

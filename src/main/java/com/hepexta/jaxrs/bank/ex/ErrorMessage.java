@@ -26,6 +26,7 @@ public enum ErrorMessage {
     ERROR_531(531, NOT_ENOUGH_MONEY_ERROR_TRANSFER),
     ERROR_532(532, ERROR_INSERTING),
     ERROR_533(533, ACCOUNT_IS_BLOCKED),
+    ERROR_534(534, DATABASE_ERROR),
     ;
 
     private int code;

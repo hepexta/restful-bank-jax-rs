@@ -46,8 +46,12 @@ public class ClientRepositoryCache implements Repository<Client> {
     }
 
     @Override
-    public boolean modify(Client client) {
-        return clients.put(client.getId(), client) != null;
+    public boolean modify(Client...clientsToModify) {
+        boolean result = true;
+        for (Client client : clientsToModify) {
+            result &= clients.put(client.getId(), client) != null;
+        }
+        return result;
     }
 
     @Override

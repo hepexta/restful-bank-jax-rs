@@ -34,8 +34,8 @@ import static org.mockito.Mockito.when;
 
 public class TransferServiceTest extends JerseyTest {
 
-    private final static String EXECUTE_ENDPOINT = "/transaction/execute";
-    private final static String FIND_BY_ACCID_ENDPOINT = "/transaction/findbyaccountid/%s";
+    private final static String EXECUTE_ENDPOINT = "/transfer/execute";
+    private final static String FIND_BY_ACCID_ENDPOINT = "/transfer/findbyaccountid/%s";
 
     private static final Repository<Account> accountRepository = mock(Repository.class);
     private static final LockRepository<Account> lockRepository = mock(LockRepository.class);
@@ -82,18 +82,19 @@ public class TransferServiceTest extends JerseyTest {
                 .operDate(LocalDate.now())
                 .comment("COMMENT")
                 .build();
-        when(accountRepository.modify(any(Account.class))).thenReturn(true);
+        when(accountRepository.modify(any(Account.class), any(Account.class))).thenReturn(true);
         when(transRepository.insert(any(Transfer.class))).thenReturn("1");
-        when(lockRepository.findByIdAndLock(eq(sourceAccount.getId()))).thenReturn(sourceAccount);
-        when(lockRepository.findByIdAndLock(eq(destAccount.getId()))).thenReturn(destAccount);
+        when(accountRepository.findById(eq(sourceAccount.getId()))).thenReturn(sourceAccount);
+        when(accountRepository.findById(eq(destAccount.getId()))).thenReturn(destAccount);
 
         Response response = target(EXECUTE_ENDPOINT)
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(transfer, MediaType.APPLICATION_JSON));
 
         assertEquals(OK.getStatusCode(), response.getStatus());
-        verify(accountRepository, times(2)).modify(any());
-        verify(lockRepository, times(2)).findByIdAndLock(any());
+        verify(accountRepository, times(1)).modify(any(), any());
+        verify(accountRepository, times(2)).findById(any());
+        verify(lockRepository, times(1)).lock(any(), any());
         verify(transRepository, times(1)).insert(any());
     }
 
@@ -115,7 +116,8 @@ public class TransferServiceTest extends JerseyTest {
         assertEquals(ErrorMessage.ERROR_521.getMessage(), response.getStatusInfo().getReasonPhrase());
         assertEquals(ErrorMessage.ERROR_521.getMessage(), response.readEntity(String.class));
         verify(accountRepository, times(0)).modify(any());
-        verify(lockRepository, times(0)).findByIdAndLock(any());
+        verify(accountRepository, times(0)).findById(any());
+        verify(lockRepository, times(0)).lock(any());
         verify(transRepository, times(0)).insert(any());
     }
 
@@ -135,7 +137,7 @@ public class TransferServiceTest extends JerseyTest {
 
         assertEquals(ErrorMessage.ERROR_528.getCode(), response.getStatus());
         verify(accountRepository, times(0)).modify(any());
-        verify(lockRepository, times(0)).findByIdAndLock(any());
+        verify(lockRepository, times(0)).lock(any());
         verify(transRepository, times(0)).insert(any());
     }
 

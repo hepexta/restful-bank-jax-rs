@@ -6,10 +6,9 @@ import org.junit.Test;
 
 public class UtilsTest {
     @Test
-    public void sad() {
+    public void testConfig() {
         Utils.loadConfig();
         String stringProperty = Utils.getStringProperty("database.user");
-        System.out.println(stringProperty);
         Assert.assertNotNull(stringProperty);
     }
 }

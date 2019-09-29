@@ -39,5 +39,9 @@ public class Transfer {
     private BigDecimal amount;
     @JsonProperty(required = true)
     private String comment;
+    @JsonProperty
+    private String status;
+    @JsonProperty
+    private String message;
 
 }

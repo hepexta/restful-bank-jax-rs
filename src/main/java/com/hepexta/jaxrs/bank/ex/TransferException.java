@@ -20,7 +20,7 @@ public class TransferException extends RuntimeException {
     }
 
     private static String getErrorText( String message, Object...params ){
-        return String.format( message, params );
+        return String.format(message, params);
     }
 
     int getErrorCode() {

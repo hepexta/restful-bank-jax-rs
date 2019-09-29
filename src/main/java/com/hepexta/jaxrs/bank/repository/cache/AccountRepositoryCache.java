@@ -46,8 +46,12 @@ public class AccountRepositoryCache implements Repository<Account> {
     }
 
     @Override
-    public boolean modify(Account model) {
-        return accounts.put(model.getId(), model) != null;
+    public boolean modify(Account...accountsToModify) {
+        boolean result = true;
+        for (Account client : accountsToModify) {
+            result &= accounts.put(client.getId(), client) != null;
+        }
+        return result;
     }
 
     @Override
