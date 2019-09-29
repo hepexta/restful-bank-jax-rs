@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class ClientRepositoryCacheTest {
 
-    private ClientRepositoryCache clientRepository = ClientRepositoryCache.getINSTANCE();
+    private ClientRepositoryCache clientRepository = ClientRepositoryCache.getInstance();
 
     @Test
     public void testCreate() {

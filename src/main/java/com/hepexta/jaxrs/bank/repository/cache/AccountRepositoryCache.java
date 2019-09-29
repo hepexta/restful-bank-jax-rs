@@ -18,13 +18,13 @@ public class AccountRepositoryCache implements Repository<Account> {
     private AccountRepositoryCache() {
     }
 
-    private static AccountRepositoryCache INSTANCE;
+    private static AccountRepositoryCache instance;
 
-    public static AccountRepositoryCache getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new AccountRepositoryCache();
+    public static AccountRepositoryCache getInstance(){
+        if (instance ==null){
+            instance = new AccountRepositoryCache();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override

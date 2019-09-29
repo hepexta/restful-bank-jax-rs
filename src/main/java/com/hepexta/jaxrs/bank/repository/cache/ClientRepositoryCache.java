@@ -18,13 +18,13 @@ public class ClientRepositoryCache implements Repository<Client> {
     private ClientRepositoryCache() {
     }
 
-    private static ClientRepositoryCache INSTANCE;
+    private static ClientRepositoryCache instance;
 
-    public static ClientRepositoryCache getINSTANCE(){
-        if (INSTANCE==null){
-            INSTANCE = new ClientRepositoryCache();
+    public static ClientRepositoryCache getInstance(){
+        if (instance == null){
+            instance = new ClientRepositoryCache();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @Override

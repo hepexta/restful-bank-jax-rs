@@ -2,7 +2,6 @@ package com.hepexta.jaxrs.bank.repository.db;
 
 import com.hepexta.jaxrs.bank.ex.ErrorMessage;
 import com.hepexta.jaxrs.bank.ex.TransferException;
-import com.hepexta.jaxrs.bank.model.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +9,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class AccountLockRepositoryDBImpl implements LockRepository<Account> {
+public class AccountLockRepositoryDBImpl implements LockRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountLockRepositoryDBImpl.class);
     private static AccountLockRepositoryDBImpl instance;

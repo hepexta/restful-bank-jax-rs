@@ -29,10 +29,10 @@ public class TransferService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransferService.class);
     private final Repository<Account> accountRepository;
-    private final LockRepository<Account> accountLockRepository;
+    private final LockRepository accountLockRepository;
     private final TransRepository<Transfer> transactionRepository;
 
-    public TransferService(Repository<Account> accountRepository, LockRepository<Account> accountLockRepository, TransRepository<Transfer> transactionRepository) {
+    public TransferService(Repository<Account> accountRepository, LockRepository accountLockRepository, TransRepository<Transfer> transactionRepository) {
         this.accountRepository = accountRepository;
         this.accountLockRepository = accountLockRepository;
         this.transactionRepository = transactionRepository;

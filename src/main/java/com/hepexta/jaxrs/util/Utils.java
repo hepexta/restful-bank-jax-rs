@@ -1,5 +1,8 @@
 package com.hepexta.jaxrs.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -7,7 +10,8 @@ import java.util.Properties;
 
 public class Utils {
 
-    private final static Properties properties = loadConfig();
+    private static final Properties properties = loadConfig();
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     public static Properties loadConfig() {
 
@@ -15,7 +19,7 @@ public class Utils {
         try (final InputStream fis = Utils.class.getResourceAsStream("/database.properties")){
             properties.load(fis);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error", e);
         }
         return properties;
     }

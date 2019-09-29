@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 
 public class AccountRepositoryCacheTest {
 
-    private AccountRepositoryCache accountRepository = AccountRepositoryCache.getINSTANCE();
+    private AccountRepositoryCache accountRepository = AccountRepositoryCache.getInstance();
     private static final Client CLIENT = Client.builder().name("John Smith").build();
 
     @Before

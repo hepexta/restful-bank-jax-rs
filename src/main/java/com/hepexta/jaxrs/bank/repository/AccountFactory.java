@@ -12,6 +12,6 @@ public class AccountFactory {
         if(env.equals(AppConstants.DB)) {
             return AccountRepositoryDBImpl.getInstance();
         }
-        return AccountRepositoryCache.getINSTANCE();
+        return AccountRepositoryCache.getInstance();
     }
 }

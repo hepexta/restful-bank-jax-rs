@@ -38,7 +38,7 @@ public class TransferServiceTest extends JerseyTest {
     private final static String FIND_BY_ACCID_ENDPOINT = "/transfer/findbyaccountid/%s";
 
     private static final Repository<Account> accountRepository = mock(Repository.class);
-    private static final LockRepository<Account> lockRepository = mock(LockRepository.class);
+    private static final LockRepository lockRepository = mock(LockRepository.class);
     private static final TransRepository<Transfer> transRepository = mock(TransRepository.class);
 
     @Override

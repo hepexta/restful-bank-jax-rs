@@ -4,18 +4,12 @@ import com.hepexta.jaxrs.cfg.JerseyConfiguration;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.h2.tools.RunScript;
-
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import static com.hepexta.jaxrs.util.AppConstants.CONTEXT;
 import static com.hepexta.jaxrs.util.AppConstants.DB;
 import static com.hepexta.jaxrs.util.AppConstants.JERSEY_SERVLET_NAME;
 import static com.hepexta.jaxrs.util.AppConstants.PORT;
 import static com.hepexta.jaxrs.util.DBUtils.dataBaseInit;
-import static com.hepexta.jaxrs.util.DBUtils.getConnection;
 
 public class Launcher {
 

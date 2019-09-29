@@ -12,6 +12,6 @@ public class ClientFactory {
         if(env.equals(AppConstants.DB)) {
             return ClientRepositoryDBImpl.getInstance();
         }
-        return ClientRepositoryCache.getINSTANCE();
+        return ClientRepositoryCache.getInstance();
     }
 }

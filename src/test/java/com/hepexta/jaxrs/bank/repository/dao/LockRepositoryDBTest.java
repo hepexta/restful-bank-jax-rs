@@ -1,6 +1,6 @@
 package com.hepexta.jaxrs.bank.repository.dao;
 
-import com.hepexta.jaxrs.bank.model.Account;
+import com.hepexta.jaxrs.bank.ex.TransferException;
 import com.hepexta.jaxrs.bank.repository.db.AccountLockRepositoryDBImpl;
 import com.hepexta.jaxrs.bank.repository.db.LockRepository;
 import org.junit.Assert;
@@ -12,7 +12,7 @@ import static com.hepexta.jaxrs.util.DBUtils.dataBasePopulate;
 
 public class LockRepositoryDBTest {
 
-    private LockRepository<Account> lockRepository = AccountLockRepositoryDBImpl.getInstance();
+    private LockRepository lockRepository = AccountLockRepositoryDBImpl.getInstance();
 
     @BeforeClass
     public static void before(){
@@ -20,10 +20,15 @@ public class LockRepositoryDBTest {
         dataBasePopulate();
     }
 
-    @Test
-    public void testFindById() {
+    @Test(expected = TransferException.class)
+    public void testLock() {
         lockRepository.lock("2");
-        //Assert.assertEquals("2", account.getId());
+        lockRepository.lock("2");
+    }
+
+    @Test(expected = Test.None.class)
+    public void testUnlock() {
+        lockRepository.unlock("2");
     }
 
 }
